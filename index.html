@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>YMM Social</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 30px 20px;
+            color: #fff;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            padding: 40px 30px;
+            max-width: 560px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .app-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 28px;
+            object-fit: cover;
+            margin-bottom: 22px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+            border: 3px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .app-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .app-title span {
+            color: #4fc3f7;
+        }
+
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 28px 0 20px;
+        }
+
+        .btn {
+            display: block;
+            padding: 14px 20px;
+            border-radius: 14px;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.25s ease;
+            border: none;
+            cursor: pointer;
+            color: white;
+        }
+
+        .btn-download {
+            background: linear-gradient(90deg, #00c853, #00e676);
+            box-shadow: 0 6px 20px rgba(0, 200, 83, 0.35);
+        }
+        .btn-download:hover { transform: translateY(-3px); }
+
+        .btn-web {
+            background: linear-gradient(90deg, #2979ff, #448aff);
+            box-shadow: 0 6px 20px rgba(41, 121, 255, 0.35);
+        }
+        .btn-web:hover { transform: translateY(-3px); }
+
+        .btn-official {
+            background: linear-gradient(90deg, #8e24aa, #ab47bc);
+            box-shadow: 0 6px 20px rgba(142, 36, 170, 0.35);
+        }
+        .btn-official:hover { transform: translateY(-3px); }
+
+        .footer {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.55);
+            margin-top: 15px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 18px;
+            color: #4fc3f7;
+        }
+
+        /* ===== قسم المميزات ===== */
+        .features-section {
+            margin-top: 30px;
+            text-align: right;
+            border-top: 1px solid rgba(255,255,255,0.12);
+            padding-top: 25px;
+        }
+
+        .feature-item {
+            background: rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .feature-item h3 {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: #90caf9;
+        }
+
+        .feature-item p {
+            font-size: 13px;
+            line-height: 1.7;
+            color: rgba(255,255,255,0.85);
+        }
+
+        /* ===== جرّار الصور ===== */
+        .screenshots-section {
+            margin-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.12);
+            padding-top: 25px;
+        }
+
+        .screenshots-slider {
+            display: flex;
+            gap: 14px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 12px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.3) transparent;
+        }
+
+        .screenshots-slider::-webkit-scrollbar {
+            height: 6px;
+        }
+        .screenshots-slider::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+        }
+        .screenshots-slider::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.25);
+            border-radius: 10px;
+        }
+
+        .screenshot-item {
+            flex: 0 0 180px;
+            scroll-snap-align: start;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.12);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+            background: #000;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .screenshot-item:hover {
+            transform: scale(1.04);
+        }
+
+        .screenshot-item img {
+            width: 100%;
+            height: 320px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .slider-hint {
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
+            margin-top: 8px;
+        }
+
+        /* ===== عارض الصورة ===== */
+        #image-viewer {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        #image-viewer.active { display: flex; }
+
+        #image-viewer img {
+            max-width: 95%;
+            max-height: 85vh;
+            border-radius: 12px;
+            object-fit: contain;
+        }
+
+        #image-viewer .close-viewer {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #333;
+            color: white;
+            border: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        /* ===== المتصفح الداخلي ===== */
+        #app-browser {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 9999;
+            flex-direction: column;
+        }
+        #app-browser.active { display: flex; }
+
+        .browser-header {
+            height: 48px;
+            background: #111;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            gap: 10px;
+            border-bottom: 1px solid #333;
+            flex-shrink: 0;
+        }
+        .browser-header button {
+            background: #333;
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .browser-title {
+            flex: 1;
+            text-align: center;
+            font-size: 14px;
+            color: #ccc;
+        }
+        #app-frame {
+            flex: 1;
+            width: 100%;
+            border: none;
+            background: #000;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="main-page">
+        <img src="https://files.catbox.moe/frxn2u.png" alt="YMM Social" class="app-image">
+
+        <h1 class="app-title">
+            تطبيق <span>YMM Social</span><br>
+            تطبيق تواصل اجتماعي متكامل
+        </h1>
+
+        <div class="buttons">
+            <a href="https://www.mediafire.com/file/m6zn2m14xi93vaw/Ymm_social%25D8%25A7%25D9%2584%25D9%2585%25D9%2584%25D9%2581_%25D8%25A7%25D9%2584%25D8%25AA%25" 
+               class="btn btn-download" target="_blank">
+                تحميل التطبيق
+            </a>
+
+            <button class="btn btn-web" onclick="openAppBrowser()">
+                تجربة التطبيق على الويب
+            </button>
+
+            <a href="https://www.socialcreator.com/youznet" 
+               class="btn btn-official" target="_blank">
+                الموقع الرسمي
+            </a>
+        </div>
+
+        <!-- ===== المميزات أولاً ===== -->
+        <div class="features-section">
+            <div class="section-title">✨ مميزات التطبيق</div>
+
+            <div class="feature-item">
+                <h3>🏠 الصفحة الرئيسية</h3>
+                <p>عرض المنشورات بطرق ترتيب مختلفة، إنشاء منشورات نصية وصور وفيديوهات، إضافة مشاعر وموسيقى، الإعجاب والتعليقات والمشاركة، وتثبيت المنشورات المهمة.</p>
+            </div>
+
+            <div class="feature-item">
+                <h3>📸 القصص (Stories)</h3>
+                <p>رفع قصص صور أو فيديو أو نص، حلقات ملونة حول الصورة الشخصية، إمكانية التحميل والإخفاء والحذف، مع إيقاف مؤقت أثناء المشاهدة.</p>
+            </div>
+
+            <div class="feature-item">
+                <h3>🎬 الريلز</h3>
+                <p>فيديوهات قصيرة بملء الشاشة، تصفح بالسحب، حفظ الريلز، فلترة المحفوظة والتي شاهدتها، وأدوات تحكم وإدارة للفيديوهات.</p>
+            </div>
+
+            <div class="feature-item">
+                <h3>💬 الدردشة والرسائل</h3>
+                <p>محادثات فردية وجماعية، رسائل صوتية، ردود وتفاعلات، تثبيت الرسائل، رسائل ذاتية التدمير، وإرفاق صور وفيديوهات وملفات.</p>
+            </div>
+
+            <div class="feature-item">
+                <h3>📞 المكالمات والغرف الصوتية</h3>
+                <p>مكالمات صوتية ومرئية، غرف صوتية جماعية برمز دعوة، كتم المايكروفون، ومكبر الصوت، مع إشعارات للمكالمات الواردة.</p>
+            </div>
+
+            <div class="feature-item">
+                <h3>👥 المجموعات والقنوات</h3>
+                <p>إنشاء مجموعات وقنوات، منشورات داخل القنوات، إدارة الأعضاء، خلفيات مخصصة، وشارات توثيق.</p>
+            </div>
+
+            <div class="feature-item">
+                <h3>🎮 الألعاب</h3>
+                <p>شطرنج، طاولة زهر، ورق لعب، سباق، وبينج بونج، مع إمكانية دعوة الأصدقاء أو اللعب الفردي.</p>
+            </div>
+
+            <div class="feature-item">
+                <h3>🛒 السوق والفعاليات</h3>
+                <p>عرض منتجات في السوق، وإنشاء وعرض فعاليات مع التاريخ والوقت.</p>
+            </div>
+
+            <div class="feature-item">
+                <h3>📰 الأخبار</h3>
+                <p>قسم أخبار مخصص مع بطاقات تحتوي على صور ومحتوى.</p>
+            </div>
+
+            <div class="feature-item">
+                <h3>🤖 المساعد الذكي YMMai</h3>
+                <p>روبوت ذكاء اصطناعي داخل التطبيق مع محادثات محفوظة وزر عائم للوصول السريع، بالإضافة إلى وكلاء ذكاء اصطناعي قابلين للتخصيص.</p>
+            </div>
+
+            <div class="feature-item">
+                <h3>👤 الملف الشخصي</h3>
+                <p>صورة شخصية وغلاف، شارات توثيق ملونة، عرض المنشورات والريلز، كود حساب خاص، وحالة نصية.</p>
+            </div>
+
+            <div class="feature-item">
+                <h3>🔔 الإشعارات والبحث</h3>
+                <p>إشعارات التفاعلات والرسائل، فلترة الإشعارات، بحث شامل عن المستخدمين والمنشورات مع سجل البحث.</p>
+            </div>
+
+            <div class="feature-item">
+                <h3>⚙️ الإعدادات</h3>
+                <p>الوضع الداكن والفاتح، تغيير اللغة (6 لغات)، حجم الأزرار، خلفية الدردشة، إخفاء المحتوى، الحسابات المتعددة، ووضع الأداء الخفيف.</p>
+            </div>
+
+            <div class="feature-item">
+                <h3>🛡️ ميزات إضافية</h3>
+                <p>البث المباشر، الاستطلاعات، الإشارات (Mentions)، المحفوظات، عارض وسائط متقدم، دعم كامل للعربية، ولوحة تحكم إدارية قوية.</p>
+            </div>
+        </div>
+
+        <!-- ===== جرّار الصور تحت المميزات ===== -->
+        <div class="screenshots-section">
+            <div class="section-title">📱 صور من داخل التطبيق</div>
+
+            <div class="screenshots-slider">
+                <div class="screenshot-item" onclick="openImage('https://files.catbox.moe/x9k3zm.png')">
+                    <img src="https://files.catbox.moe/x9k3zm.png" alt="صورة 1" loading="lazy">
+                </div>
+                <div class="screenshot-item" onclick="openImage('https://files.catbox.moe/9gagt2.png')">
+                    <img src="https://files.catbox.moe/9gagt2.png" alt="صورة 2" loading="lazy">
+                </div>
+                <div class="screenshot-item" onclick="openImage('https://files.catbox.moe/jmus8o.png')">
+                    <img src="https://files.catbox.moe/jmus8o.png" alt="صورة 3" loading="lazy">
+                </div>
+                <div class="screenshot-item" onclick="openImage('https://files.catbox.moe/nn72rb.png')">
+                    <img src="https://files.catbox.moe/nn72rb.png" alt="صورة 4" loading="lazy">
+                </div>
+                <div class="screenshot-item" onclick="openImage('https://files.catbox.moe/tr9g56.png')">
+                    <img src="https://files.catbox.moe/tr9g56.png" alt="صورة 5" loading="lazy">
+                </div>
+                <div class="screenshot-item" onclick="openImage('https://files.catbox.moe/rfk5w2.png')">
+                    <img src="https://files.catbox.moe/rfk5w2.png" alt="صورة 6" loading="lazy">
+                </div>
+                <div class="screenshot-item" onclick="openImage('https://files.catbox.moe/qfv2hz.png')">
+                    <img src="https://files.catbox.moe/qfv2hz.png" alt="صورة 7" loading="lazy">
+                </div>
+                <div class="screenshot-item" onclick="openImage('https://files.catbox.moe/w2uxqq.png')">
+                    <img src="https://files.catbox.moe/w2uxqq.png" alt="صورة 8" loading="lazy">
+                </div>
+                <div class="screenshot-item" onclick="openImage('https://files.catbox.moe/tigy95.png')">
+                    <img src="https://files.catbox.moe/tigy95.png" alt="صورة 9" loading="lazy">
+                </div>
+                <div class="screenshot-item" onclick="openImage('https://files.catbox.moe/9j521r.png')">
+                    <img src="https://files.catbox.moe/9j521r.png" alt="صورة 10" loading="lazy">
+                </div>
+                <div class="screenshot-item" onclick="openImage('https://files.catbox.moe/fc8qw2.png')">
+                    <img src="https://files.catbox.moe/fc8qw2.png" alt="صورة 11" loading="lazy">
+                </div>
+            </div>
+            <p class="slider-hint">← اسحب لليمين أو اليسار لعرض المزيد من الصور →</p>
+        </div>
+
+        <p class="footer">by YMM yousef mamdoh mohamad</p>
+    </div>
+
+    <!-- عارض الصورة -->
+    <div id="image-viewer">
+        <button class="close-viewer" onclick="closeImage()">✕</button>
+        <img id="viewer-img" src="" alt="صورة مكبرة">
+    </div>
+
+    <!-- المتصفح الداخلي -->
+    <div id="app-browser">
+        <div class="browser-header">
+            <button onclick="closeAppBrowser()" title="إغلاق">✕</button>
+            <div class="browser-title">YMM Social - تجربة الويب</div>
+            <button onclick="reloadApp()" title="تحديث">↻</button>
+        </div>
+        <iframe 
+            id="app-frame" 
+            src=""
+            allow="camera *; microphone *; geolocation *; autoplay *; fullscreen *; notifications *; display-capture *; accelerometer *; gyroscope *; magnetometer *"
+            allowfullscreen
+            referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+    </div>
+
+    <script>
+        function openAppBrowser() {
+            const browser = document.getElementById('app-browser');
+            const frame = document.getElementById('app-frame');
+            frame.src = "https://youzkingnetworkyousefapp-gif.github.io/yousefymm/";
+            browser.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeAppBrowser() {
+            const browser = document.getElementById('app-browser');
+            const frame = document.getElementById('app-frame');
+            browser.classList.remove('active');
+            frame.src = "";
+            document.body.style.overflow = '';
+        }
+
+        function reloadApp() {
+            const frame = document.getElementById('app-frame');
+            frame.src = frame.src;
+        }
+
+        function openImage(src) {
+            document.getElementById('viewer-img').src = src;
+            document.getElementById('image-viewer').classList.add('active');
+        }
+
+        function closeImage() {
+            document.getElementById('image-viewer').classList.remove('active');
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeAppBrowser();
+                closeImage();
+            }
+        });
+    </script>
+</body>
+</html>
