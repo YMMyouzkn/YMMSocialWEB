@@ -1,0 +1,1824 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>YMM Video</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root{
+  --bg:#000;--panel:#0c0c0c;--card:#161616;--text:#fff;--muted:#9ca3af;
+  --accent:#fe2c55;--accent2:#25f4ee;--line:rgba(255,255,255,.08);
+  --social:#3b82f6;--safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-bottom,0px);--nav:58px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#000;color:#fff;font-family:'Cairo',system-ui,sans-serif;overflow:hidden}
+button,input,textarea{font-family:inherit}
+.hide{display:none!important}
+
+/* SPLASH */
+#splash{
+  position:fixed;inset:0;z-index:9999;background:#000;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;transition:opacity .45s ease, visibility .45s;
+}
+#splash.go{opacity:0;visibility:hidden;pointer-events:none}
+.splash-logo{
+  width:88px;height:88px;border-radius:26px;display:flex;align-items:center;justify-content:center;
+  font-size:34px;font-weight:900;color:#fff;
+  background:linear-gradient(135deg,#fe2c55,#ff6b4a 50%,#25f4ee);
+  box-shadow:0 16px 50px rgba(254,44,85,.4);animation:pulse 1.6s ease-in-out infinite;
+}
+@keyframes pulse{50%{transform:scale(1.05)}}
+.splash-title{margin-top:18px;font-size:32px;font-weight:900;letter-spacing:.5px}
+.splash-from{margin-top:8px;font-size:12px;color:#6b7280;letter-spacing:3px;font-weight:700}
+.splash-from b{color:#25f4ee}
+.splash-bar{width:120px;height:3px;border-radius:4px;background:#1f1f1f;margin-top:28px;overflow:hidden}
+.splash-bar i{display:block;height:100%;width:40%;background:linear-gradient(90deg,#fe2c55,#25f4ee);animation:load 1.1s ease-in-out infinite}
+@keyframes load{0%{transform:translateX(-120%)}100%{transform:translateX(280%)}}
+
+/* AUTH */
+#auth{
+  position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:22px;
+  background:radial-gradient(900px 500px at 100% 0%,rgba(254,44,85,.22),transparent 55%),
+             radial-gradient(700px 400px at 0% 100%,rgba(37,244,238,.12),transparent 50%),#000;
+}
+#auth.show{display:flex}
+.auth-box{
+  width:100%;max-width:400px;background:rgba(12,12,12,.92);border:1px solid var(--line);
+  border-radius:24px;padding:26px 20px;backdrop-filter:blur(14px)
+}
+.auth-box h1{margin:0;text-align:center;font-size:26px;font-weight:900}
+.auth-box .sub{text-align:center;color:var(--muted);font-size:13px;margin:8px 0 18px;line-height:1.6}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+.field input{
+  width:100%;background:#0a0a0a;border:1px solid var(--line);border-radius:14px;padding:12px 14px;color:#fff;outline:none
+}
+.btn{
+  width:100%;border:0;border-radius:14px;padding:13px;font-weight:800;cursor:pointer;font-size:14px
+}
+.btn-main{background:linear-gradient(90deg,#fe2c55,#ff4d6d);color:#fff;margin-top:6px}
+.btn-dl{
+  margin-top:10px;background:transparent;color:#fff;border:1px solid rgba(37,244,238,.35);
+  display:flex;align-items:center;justify-content:center;gap:8px
+}
+.auth-msg{min-height:18px;text-align:center;color:#f87171;font-size:12px;margin-top:8px}
+
+/* APP */
+#app{height:100%;height:100dvh;display:none;flex-direction:column}
+#app.on{display:flex}
+#stage{flex:1;position:relative;overflow:hidden}
+.view{position:absolute;inset:0;display:none;overflow:auto;background:#000}
+.view.on{display:block}
+#view-home.on{overflow:hidden}
+
+#feed{position:absolute;inset:0;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none}
+#feed::-webkit-scrollbar{display:none}
+.reel{position:relative;height:100%;scroll-snap-align:start;scroll-snap-stop:always;background:#000;overflow:hidden}
+.reel-media{position:absolute;inset:0}
+.reel-media video,.reel-media img{width:100%;height:100%;object-fit:cover;background:#000}
+.reel-media .slides{position:absolute;inset:0;display:flex;overflow:hidden}
+.reel-media .slides .slide{min-width:100%;height:100%}
+.reel-media .slides .slide img{width:100%;height:100%;object-fit:cover}
+.dots{position:absolute;top:calc(12px + var(--safe-t));left:0;right:0;display:flex;justify-content:center;gap:5px;z-index:6;pointer-events:none}
+.dots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.35)}
+.dots i.on{background:#fff;width:14px;border-radius:4px}
+.grad{position:absolute;inset:0;pointer-events:none;background:linear-gradient(to top,rgba(0,0,0,.78),transparent 32%),linear-gradient(to bottom,rgba(0,0,0,.4),transparent 16%)}
+.side{position:absolute;left:10px;bottom:108px;z-index:5;display:flex;flex-direction:column;align-items:center;gap:15px}
+.sbtn{border:0;background:0;color:#fff;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
+.sbtn .c{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:21px;backdrop-filter:blur(8px)}
+.sbtn.liked .c{color:var(--accent)}
+.sbtn span{font-size:11px;font-weight:700;text-shadow:0 1px 3px #000}
+.av{width:48px;height:48px;border-radius:50%;border:2px solid #fff;object-fit:cover;background:#333}
+.plus{position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:18px;height:18px;border-radius:50%;background:var(--accent);font-size:10px;display:flex;align-items:center;justify-content:center;border:2px solid #000}
+.meta{position:absolute;right:14px;left:70px;bottom:100px;z-index:5}
+.meta b{font-size:15px}
+.meta .txt{font-size:13px;line-height:1.5;margin-top:6px;max-height:3.1em;overflow:hidden}
+.meta .txt.open{max-height:none}
+.badge-social{
+  display:inline-flex;align-items:center;gap:5px;margin-top:8px;font-size:11px;font-weight:800;
+  padding:4px 10px;border-radius:999px;background:rgba(59,130,246,.2);color:#93c5fd;border:1px solid rgba(59,130,246,.35)
+}
+.badge-own{
+  display:inline-flex;align-items:center;gap:5px;margin-top:8px;font-size:11px;font-weight:800;
+  padding:4px 10px;border-radius:999px;background:rgba(37,244,238,.12);color:#67e8f9;border:1px solid rgba(37,244,238,.3)
+}
+.top{position:absolute;top:0;left:0;right:0;z-index:8;padding:calc(8px + var(--safe-t)) 12px 8px;display:flex;align-items:center;justify-content:space-between;pointer-events:none}
+.top>*{pointer-events:auto}
+.tabs{display:flex;gap:14px}
+.tabs button{background:0;border:0;color:rgba(255,255,255,.5);font-weight:800;font-size:15px;cursor:pointer}
+.tabs button.on{color:#fff}
+.tabs button.on::after{content:'';display:block;width:16px;height:2px;background:#fff;margin:4px auto 0;border-radius:2px}
+.ib{width:38px;height:38px;border-radius:50%;border:0;background:rgba(0,0,0,.35);color:#fff;cursor:pointer}
+
+/* stories strip */
+.stories-strip{
+  position:absolute;top:calc(52px + var(--safe-t));left:0;right:0;z-index:7;
+  display:flex;gap:10px;padding:0 12px;overflow-x:auto;scrollbar-width:none;pointer-events:auto
+}
+.stories-strip::-webkit-scrollbar{display:none}
+.st{
+  flex:0 0 auto;width:64px;text-align:center;cursor:pointer
+}
+.st .ring{
+  width:58px;height:58px;border-radius:50%;padding:2px;
+  background:linear-gradient(135deg,#fe2c55,#25f4ee);margin:0 auto
+}
+.st .ring img{width:100%;height:100%;border-radius:50%;object-fit:cover;border:2px solid #000;background:#222}
+.st .nm{font-size:10px;margin-top:4px;color:#ddd;max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.st.add .ring{background:#222;display:flex;align-items:center;justify-content:center;border:1px dashed #444}
+.st.seen .ring{background:#333}
+
+#nav{
+  height:calc(var(--nav) + var(--safe-b));padding-bottom:var(--safe-b);background:#000;border-top:1px solid var(--line);
+  display:grid;grid-template-columns:repeat(5,1fr);z-index:20
+}
+#nav button{border:0;background:0;color:#777;font-size:10px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0;cursor:pointer}
+#nav button i{font-size:18px}
+#nav button.on{color:#fff}
+#nav .cr .p{
+  width:44px;height:28px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(90deg,#25f4ee,#fff 42%,#fe2c55);color:#000;font-weight:900;font-size:18px
+}
+
+.phdr{
+  position:sticky;top:0;z-index:5;background:rgba(0,0,0,.9);backdrop-filter:blur(10px);
+  padding:calc(12px + var(--safe-t)) 14px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)
+}
+.phdr h2{margin:0;font-size:17px}
+.hero{padding:18px 14px;text-align:center}
+.hero img{width:92px;height:92px;border-radius:50%;object-fit:cover;border:3px solid #222;background:#222}
+.hero h3{margin:10px 0 2px}
+.hero .h{color:var(--muted);font-size:13px}
+.stats{display:flex;justify-content:center;gap:26px;margin:14px 0}
+.stats b{display:block;font-size:16px}
+.stats span{font-size:11px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding-bottom:70px}
+.grid .cell{aspect-ratio:9/16;background:#111;position:relative;overflow:hidden;cursor:pointer}
+.grid video,.grid img{width:100%;height:100%;object-fit:cover}
+.row{display:flex;gap:12px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line)}
+.row img{width:48px;height:48px;border-radius:50%;object-fit:cover;background:#222}
+.row .t{flex:1;min-width:0}
+.row .t b{display:block;font-size:14px}
+.row .t span{font-size:12px;color:var(--muted)}
+.chip{border:0;border-radius:11px;padding:8px 14px;font-weight:700;font-size:12px;cursor:pointer;background:var(--accent);color:#fff}
+.ghost{border:1px solid var(--line);border-radius:11px;padding:8px 14px;font-weight:700;font-size:12px;cursor:pointer;background:#161616;color:#fff}
+.seg{display:flex;gap:6px;padding:10px 14px}
+.seg button{flex:1;border:0;background:#161616;color:#999;padding:10px;border-radius:12px;font-weight:700;cursor:pointer}
+.seg button.on{background:#222;color:#fff}
+.empty{padding:40px 16px;text-align:center;color:var(--muted);font-size:13px}
+.set-item{
+  display:flex;align-items:center;justify-content:space-between;padding:14px;border-bottom:1px solid var(--line);cursor:pointer
+}
+.set-item span{font-size:14px;font-weight:600}
+
+/* sheets */
+.sheet-bg{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.55);display:none;align-items:flex-end}
+.sheet-bg.open{display:flex}
+.sheet{width:100%;max-width:560px;margin:0 auto;background:#121212;border-radius:18px 18px 0 0;max-height:88vh;display:flex;flex-direction:column;border:1px solid var(--line);border-bottom:0}
+.sh{padding:14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
+.sh h3{margin:0;font-size:15px}
+.sb{padding:14px;overflow:auto;flex:1}
+.sf{padding:10px 14px calc(10px + var(--safe-b));border-top:1px solid var(--line);display:flex;gap:8px}
+.sf input{flex:1;background:#0a0a0a;border:1px solid var(--line);border-radius:999px;padding:11px 14px;color:#fff;outline:none}
+.cmt{display:flex;gap:10px;margin-bottom:12px}
+.cmt img{width:34px;height:34px;border-radius:50%;object-fit:cover;background:#333}
+.cmt .from{font-size:10px;color:#93c5fd;font-weight:700;margin-top:2px}
+#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(12px);background:#161616;border:1px solid var(--line);padding:10px 14px;border-radius:999px;font-size:12px;font-weight:700;opacity:0;z-index:200;transition:.25s;pointer-events:none}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.heart{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.5);font-size:78px;color:var(--accent);opacity:0;pointer-events:none;z-index:9;transition:.35s}
+.heart.pop{opacity:1;transform:translate(-50%,-50%) scale(1.1)}
+#admin-panel{position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;padding:16px}
+#admin-panel.open{display:flex}
+.admin-card{width:100%;max-width:420px;background:#121212;border-radius:18px;border:1px solid var(--line);padding:16px;max-height:80vh;overflow:auto}
+.admin-card h3{margin:0 0 10px}
+.story-viewer{position:fixed;inset:0;z-index:90;background:#000;display:none;flex-direction:column}
+.story-viewer.open{display:flex}
+.story-viewer img,.story-viewer video{width:100%;height:100%;object-fit:contain;background:#000}
+.story-top{position:absolute;top:calc(10px + var(--safe-t));left:12px;right:12px;z-index:2}
+.story-progress{display:flex;gap:4px;margin-bottom:10px}
+.story-progress i{flex:1;height:3px;background:rgba(255,255,255,.25);border-radius:2px;overflow:hidden}
+.story-progress i b{display:block;height:100%;width:0;background:#fff}
+
+.cmt-actions{display:flex;gap:12px;margin-top:6px;align-items:center}
+.cmt-actions button{border:0;background:0;color:#9ca3af;font-size:11px;font-weight:700;cursor:pointer;padding:0}
+.cmt-actions button.liked{color:#fe2c55}
+.cmt-reply-box{margin-top:8px;display:flex;gap:6px}
+.cmt-reply-box input{flex:1;background:#0a0a0a;border:1px solid var(--line);border-radius:999px;padding:8px 12px;color:#fff;font-size:12px;outline:none}
+.replies{margin-top:8px;padding-right:12px;border-right:2px solid #222}
+.vid-handle{font-size:12px;color:#25f4ee;font-weight:700;direction:ltr;display:inline-block}
+
+
+.thumb-preview{width:100%;max-height:180px;object-fit:cover;border-radius:14px;background:#111;margin-top:8px}
+.save-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.pill{border:1px solid var(--line);background:#161616;color:#fff;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer}
+.pill.on{border-color:#25f4ee;color:#25f4ee}
+.name-social{font-size:11px;color:#9ca3af;margin-top:2px}
+.file-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.file-row input[type=file]{flex:1}
+.file-row .link-btn{flex:0 0 auto}
+#view-saved .grid{padding:8px}
+.set-section{padding:12px 14px 4px;font-size:11px;color:#6b7280;font-weight:800;letter-spacing:.5px}
+.toggle{width:44px;height:26px;border-radius:999px;background:#333;position:relative;border:0;cursor:pointer}
+.toggle.on{background:#fe2c55}
+.toggle i{position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s}
+.toggle.on i{right:21px}
+
+
+.trend-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(254,44,85,.15);color:#fe2c55;border:1px solid rgba(254,44,85,.35);padding:6px 12px;border-radius:999px;font-size:12px;font-weight:800;cursor:pointer}
+.edit-bar{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.acct-list .row{cursor:pointer}
+.search-suggest{padding:8px 14px}
+.search-suggest button{display:block;width:100%;text-align:right;border:0;background:#161616;color:#ddd;padding:10px 12px;border-radius:12px;margin-bottom:6px;font-size:13px;cursor:pointer}
+
+body.reduce-lag *{animation:none!important;transition:none!important}
+body.reduce-lag .reel video{content-visibility:auto}
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-logo">V</div>
+  <div class="splash-title">YMM video</div>
+  <div class="splash-from">FROM <b>YMM</b></div>
+  <div class="splash-bar"><i></i></div>
+</div>
+
+<!-- AUTH: login only -->
+<div id="auth">
+  <div class="auth-box">
+    <h1>YMM Video</h1>
+    <div class="sub">سجّل دخولك من <b style="color:#25f4ee">YMM Social</b><br>نفس حسابك على السوشيال — بدون إنشاء حساب جديد هنا</div>
+    <div class="field"><label>البريد</label><input id="email" type="email" dir="ltr" placeholder="email@example.com"></div>
+    <div class="field"><label>كلمة المرور</label><input id="pass" type="password" dir="ltr" placeholder="••••••••"></div>
+    <div class="auth-msg" id="auth-msg"></div>
+    <button class="btn btn-main" id="btn-login" onclick="V.login()">تسجيل الدخول</button>
+    <button class="btn btn-dl" onclick="V.downloadSocial()"><i class="fas fa-download"></i> تحميل YMM Social وإنشاء حساب</button>
+    <p style="text-align:center;color:#6b7280;font-size:11px;margin:12px 0 0;line-height:1.5">ما عندكش حساب؟ حمّل السوشيال وأنشئ حسابك هناك، بعدين ارجع سجّل دخولك هنا.</p>
+  </div>
+</div>
+
+<div id="app">
+  <div id="stage">
+    <!-- HOME -->
+    <div id="view-home" class="view on">
+      <div class="top">
+        <div style="display:flex;gap:6px">
+          <button class="ib" onclick="V.openSettings()" title="إعدادات"><i class="fas fa-bars"></i></button>
+          <button class="ib" onclick="V.refreshFeed()" title="تحديث"><i class="fas fa-sync-alt"></i></button>
+          <button class="ib" onclick="V.openSearch()" title="بحث"><i class="fas fa-search"></i></button>
+        </div>
+        <div class="tabs">
+          <button class="on" data-f="forYou" onclick="V.setFeed('forYou')">لك</button>
+          <button data-f="following" onclick="V.setFeed('following')">متابَعون</button>
+        </div>
+        <button class="ib" id="btn-trending" onclick="V.openTrending()" title="رائج"><i class="fas fa-fire" style="color:#fe2c55"></i></button>
+        <button class="ib" id="secret-admin" onclick="V.secretTap()" title=""><i class="fas fa-bolt" style="opacity:.35"></i></button>
+      </div>
+      <div id="feed"></div>
+    </div>
+
+    <!-- DISCOVER -->
+    <div id="view-discover" class="view">
+      <div class="phdr"><h2>اكتشف</h2></div>
+      <div style="padding:10px 0 4px">
+        <div style="padding:0 14px 6px;font-size:12px;color:#9ca3af;font-weight:700">القصص</div>
+        <div class="stories-strip" id="stories-strip" style="position:relative;top:auto;left:auto;right:auto;padding:0 12px 8px"></div>
+      </div>
+      <div class="seg">
+        <button class="on" data-d="friends" onclick="V.discoverTab('friends')">الأصدقاء</button>
+        <button data-d="following" onclick="V.discoverTab('following')">الذين تابعتهم</button>
+        <button data-d="suggested" onclick="V.discoverTab('suggested')">مقترحون</button>
+      </div>
+      <div id="discover-list"></div>
+    </div>
+
+    <!-- INBOX -->
+    <div id="view-inbox" class="view">
+      <div class="phdr"><h2>النشاط</h2></div>
+      <div class="empty">تفاعلات الإعجاب والتعليقات والمتابعة تظهر هنا أثناء استخدامك للتطبيق.</div>
+    </div>
+
+    <!-- PROFILE -->
+    <div id="view-profile" class="view">
+      <div class="phdr">
+        <button class="ib" onclick="V.tab('home')"><i class="fas fa-arrow-right"></i></button>
+        <h2 id="p-title">حسابي</h2>
+        <button class="ib" onclick="V.openSettings()"><i class="fas fa-cog"></i></button>
+      </div>
+      <div class="hero">
+        <img id="p-av" src="" alt="">
+        <h3 id="p-name">—</h3>
+        <div class="name-social" id="p-social-name"></div>
+        <div class="h" id="p-handle">@—</div>
+        <p id="p-bio" style="font-size:13px;color:#c4c4c4;margin:8px 16px;line-height:1.5">—</p>
+        <div class="stats">
+          <div><b id="p-fg">0</b><span>متابَع</span></div>
+          <div><b id="p-fr">0</b><span>متابعون</span></div>
+          <div><b id="p-lk">0</b><span>إعجابات</span></div>
+        </div>
+        <div id="p-actions"></div>
+      </div>
+      <div class="grid" id="p-grid"></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="view-settings" class="view">
+      <div class="phdr">
+        <button class="ib" onclick="V.tab('home')"><i class="fas fa-arrow-right"></i></button>
+        <h2>الإعدادات</h2>
+        <span></span>
+      </div>
+      <div class="set-section">الحساب</div>
+      <div class="set-item" onclick="V.tab('profile')"><span><i class="fas fa-user"></i> &nbsp;حسابي</span><i class="fas fa-chevron-left" style="color:#666"></i></div>
+      <div class="set-item" onclick="V.editDisplayName()"><span><i class="fas fa-signature"></i> &nbsp;تغيير الاسم في YMM Video</span><i class="fas fa-chevron-left" style="color:#666"></i></div>
+      <div class="set-item" onclick="V.tab('saved')"><span><i class="fas fa-bookmark"></i> &nbsp;المحفوظات</span><i class="fas fa-chevron-left" style="color:#666"></i></div>
+
+      <div class="set-section">الخصوصية</div>
+      <div class="set-item" onclick="V.togglePref('privateAccount')"><span><i class="fas fa-lock"></i> &nbsp;حساب خاص</span><button type="button" class="toggle" id="tg-private"><i></i></button></div>
+      <div class="set-item" onclick="V.togglePref('hideLikes')"><span><i class="fas fa-heart"></i> &nbsp;إخفاء الإعجابات</span><button type="button" class="toggle" id="tg-hidelikes"><i></i></button></div>
+      <div class="set-item" onclick="V.togglePref('commentsOff')"><span><i class="fas fa-comment-slash"></i> &nbsp;إيقاف التعليقات على منشوراتي</span><button type="button" class="toggle" id="tg-cmtoff"><i></i></button></div>
+      <div class="set-item" onclick="V.togglePref('suggestMe')"><span><i class="fas fa-user-plus"></i> &nbsp;اقتراح حسابي للآخرين</span><button type="button" class="toggle on" id="tg-suggest"><i></i></button></div>
+
+      <div class="set-section">المظهر</div>
+      <div class="set-item"><span><i class="fas fa-moon"></i> &nbsp;الوضع الداكن</span><span style="color:#25f4ee;font-size:12px">مفعّل</span></div>
+      <div class="set-item" onclick="V.togglePref('reduceMotion')"><span><i class="fas fa-wind"></i> &nbsp;تقليل الحركة</span><button type="button" class="toggle" id="tg-motion"><i></i></button></div>
+      <div class="set-item" onclick="V.togglePref('compactFeed')"><span><i class="fas fa-compress"></i> &nbsp;عرض مضغوط</span><button type="button" class="toggle" id="tg-compact"><i></i></button></div>
+      <div class="set-item" onclick="V.setFeedPref()"><span><i class="fas fa-random"></i> &nbsp;تفضيل فيديوهات YMM Video</span><span id="pref-label" style="color:#9ca3af;font-size:12px">نعم</span></div>
+
+            <div class="set-section">أدوات</div>
+      <div class="set-item" onclick="V.openAccounts()"><span><i class="fas fa-users"></i> &nbsp;تبديل الحسابات</span><i class="fas fa-chevron-left" style="color:#666"></i></div>
+      <div class="set-item" onclick="V.togglePref('reduceLag')"><span><i class="fas fa-tachometer-alt"></i> &nbsp;تقليل اللاق</span><button type="button" class="toggle" id="tg-lag"><i></i></button></div>
+      <div class="set-item" onclick="V.openCatbox()"><span><i class="fas fa-cloud-upload-alt"></i> &nbsp;فتح Catbox</span><i class="fas fa-chevron-left" style="color:#666"></i></div>
+   <div id="view-saved" class="view">
+      <div class="phdr">
+        <button class="ib" onclick="V.tab('settings')"><i class="fas fa-arrow-right"></i></button>
+        <h2>المحفوظات</h2>
+        <span></span>
+      </div>
+      <div class="seg">
+        <button class="on" data-sv="reels" onclick="V.savedTab('reels')">فيديوهات</button>
+        <button data-sv="comments" onclick="V.savedTab('comments')">تعليقات</button>
+      </div>
+      <div id="saved-box"></div>
+    </div>
+  </div>
+
+  <nav id="nav">
+    <button class="on" data-t="home" onclick="V.tab('home')"><i class="fas fa-home"></i>رئيسية</button>
+    <button data-t="discover" onclick="V.tab('discover')"><i class="fas fa-compass"></i>اكتشف</button>
+    <button class="cr" onclick="V.openCreate()"><div class="p">+</div></button>
+    <button data-t="inbox" onclick="V.tab('inbox')"><i class="fas fa-inbox"></i>وارد</button>
+    <button data-t="profile" onclick="V.tab('profile')"><i class="fas fa-user"></i>أنا</button>
+  </nav>
+</div>
+
+<!-- CREATE -->
+<div class="sheet-bg" id="create-bg">
+  <div class="sheet">
+    <div class="sh">
+      <button class="ghost" onclick="V.closeCreate()">إلغاء</button>
+      <h3>رفع لـ YMM Video</h3>
+      <button class="chip" onclick="V.publish()">نشر</button>
+    </div>
+    <div class="sb">
+      <div class="field">
+        <label style="color:#9ca3af;font-size:12px">فيديو <span style="color:#fe2c55">*</span></label>
+        <div class="file-row">
+          <input type="file" id="f-video" accept="video/*">
+          <button type="button" class="ghost link-btn" onclick="V.promptLink('f-video-url')">رابط</button>
+        </div>
+        <input type="url" id="f-video-url" placeholder="رابط فيديو مباشر (اختياري)" dir="ltr" style="width:100%;margin-top:6px;background:#0a0a0a;border:1px solid var(--line);border-radius:12px;padding:10px;color:#fff">
+      </div>
+      <div class="field">
+        <label style="color:#9ca3af;font-size:12px">صورة مصغرة للفيديو <span style="color:#fe2c55">* مطلوبة</span></label>
+        <div class="file-row">
+          <input type="file" id="f-thumb" accept="image/*">
+          <button type="button" class="ghost link-btn" onclick="V.promptLink('f-thumb-url')">رابط</button>
+        </div>
+        <input type="url" id="f-thumb-url" placeholder="رابط صورة مصغرة" dir="ltr" style="width:100%;margin-top:6px;background:#0a0a0a;border:1px solid var(--line);border-radius:12px;padding:10px;color:#fff">
+        <img id="thumb-preview" class="thumb-preview hide" alt="معاينة">
+      </div>
+      <div class="field">
+        <label style="color:#9ca3af;font-size:12px">صور متعددة (ريلز صور)</label>
+        <div class="file-row">
+          <input type="file" id="f-images" accept="image/*" multiple>
+          <button type="button" class="ghost link-btn" onclick="V.promptLink('f-urls')">روابط</button>
+        </div>
+      </div>
+      <div class="field"><label style="color:#9ca3af;font-size:12px">روابط وسائط إضافية (سطر لكل رابط)</label>
+        <textarea id="f-urls" rows="2" style="width:100%;background:#0a0a0a;border:1px solid var(--line);border-radius:12px;color:#fff;padding:10px" dir="ltr" placeholder="https://..."></textarea>
+      </div>
+      <div class="field"><label style="color:#9ca3af;font-size:12px">الوصف / الهاشتاج</label>
+        <textarea id="f-text" rows="3" style="width:100%;background:#0a0a0a;border:1px solid var(--line);border-radius:12px;color:#fff;padding:10px" placeholder="اكتب وصفاً... #YMM"></textarea>
+      </div>
+      <div class="field">
+        <label style="color:#9ca3af;font-size:12px">من يمكنه المشاهدة</label>
+        <select id="f-privacy" style="width:100%;background:#0a0a0a;border:1px solid var(--line);border-radius:12px;padding:10px;color:#fff">
+          <option value="public">الجميع</option>
+          <option value="followers">المتابعون فقط</option>
+          <option value="private">أنا فقط</option>
+        </select>
+      </div>
+      <p style="font-size:11px;color:#6b7280">الصورة المصغرة إلزامية قبل النشر. يمكنك رفع ملف أو لصق رابط (Catbox وغيره).</p>
+    </div>
+  </div>
+</div>
+
+<!-- COMMENTS -->
+<div class="sheet-bg" id="cmt-bg">
+  <div class="sheet">
+    <div class="sh"><h3>التعليقات</h3><button class="ib" onclick="V.closeCmt()"><i class="fas fa-times"></i></button></div>
+    <div class="sb" id="cmt-list"></div>
+    <div class="sf">
+      <input id="cmt-in" placeholder="أضف تعليقاً...">
+      <button class="chip" onclick="V.sendCmt()">إرسال</button>
+    </div>
+  </div>
+</div>
+
+<!-- STORY VIEWER -->
+<div class="story-viewer" id="story-viewer">
+  <div class="story-top">
+    <div class="story-progress" id="story-progress"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="display:flex;gap:8px;align-items:center"><img id="sv-av" style="width:32px;height:32px;border-radius:50%;object-fit:cover"><b id="sv-name" style="font-size:13px"></b></div>
+      <button class="ib" onclick="V.closeStory()"><i class="fas fa-times"></i></button>
+    </div>
+  </div>
+  <div id="sv-media" style="flex:1;display:flex;align-items:center;justify-content:center"></div>
+</div>
+
+<!-- ADMIN -->
+<div id="admin-panel">
+  <div class="admin-card">
+    <h3><i class="fas fa-shield-alt" style="color:#fe2c55"></i> إدارة YMM Video</h3>
+    <p style="font-size:12px;color:#9ca3af" id="admin-info">—</p>
+    <div class="set-item" onclick="V.adminRefresh()"><span>تحديث الريلز</span></div>
+    <div class="set-item" onclick="V.adminToggleSocial()"><span>إظهار فيديوهات السوشيال نادراً</span><span id="adm-social-pref">نعم</span></div>
+    <div class="set-item" onclick="V.adminDeleteActive()" style="color:#fe2c55"><span>حذف الريل الحالي (إن وُجد)</span></div>
+    <button class="btn btn-main" style="margin-top:12px" onclick="V.closeAdmin()">إغلاق</button>
+  </div>
+</div>
+
+
+<div class="sheet-bg" id="trend-bg">
+  <div class="sheet" style="height:85vh">
+    <div class="sh"><h3>🔥 الرائج</h3><button class="ib" onclick="document.getElementById('trend-bg').classList.remove('open')"><i class="fas fa-times"></i></button></div>
+    <div class="sb" id="trend-list"></div>
+  </div>
+</div>
+<div class="sheet-bg" id="search-bg">
+  <div class="sheet" style="height:90vh">
+    <div class="sh"><h3>بحث</h3><button class="ib" onclick="document.getElementById('search-bg').classList.remove('open')"><i class="fas fa-times"></i></button></div>
+    <div class="sb">
+      <input id="search-q" placeholder="ابحث عن فيديو أو حساب..." style="width:100%;background:#0a0a0a;border:1px solid var(--line);border-radius:14px;padding:12px;color:#fff;margin-bottom:10px" oninput="V.runSearch()">
+      <div class="search-suggest" id="search-suggest"></div>
+      <div id="search-results"></div>
+    </div>
+  </div>
+</div>
+<div class="sheet-bg" id="edit-bg">
+  <div class="sheet">
+    <div class="sh"><h3>تعديل الريل</h3><button class="ib" onclick="document.getElementById('edit-bg').classList.remove('open')"><i class="fas fa-times"></i></button></div>
+    <div class="sb">
+      <textarea id="edit-text" rows="4" style="width:100%;background:#0a0a0a;border:1px solid var(--line);border-radius:12px;color:#fff;padding:10px"></textarea>
+      <input type="hidden" id="edit-id">
+      <button class="chip" style="width:100%;margin-top:10px" onclick="V.saveEdit()">حفظ التعديل</button>
+      <button class="ghost" style="width:100%;margin-top:8px;color:#fe2c55" onclick="V.deleteReel()">حذف الريل</button>
+    </div>
+  </div>
+</div>
+<div class="sheet-bg" id="accounts-bg">
+  <div class="sheet">
+    <div class="sh"><h3>تبديل الحسابات</h3><button class="ib" onclick="document.getElementById('accounts-bg').classList.remove('open')"><i class="fas fa-times"></i></button></div>
+    <div class="sb" id="accounts-list"></div>
+    <div class="sb" style="border-top:1px solid var(--line)">
+      <div class="field"><label style="color:#9ca3af;font-size:12px">إضافة حساب YMM Social</label>
+        <input id="acc-email" type="email" dir="ltr" placeholder="email" style="width:100%;background:#0a0a0a;border:1px solid var(--line);border-radius:12px;padding:10px;color:#fff;margin-bottom:6px">
+        <input id="acc-pass" type="password" dir="ltr" placeholder="password" style="width:100%;background:#0a0a0a;border:1px solid var(--line);border-radius:12px;padding:10px;color:#fff;margin-bottom:6px">
+        <button class="chip" style="width:100%" onclick="V.addAccount()">تسجيل وإضافة</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="sheet-bg" id="admin-login-bg">
+  <div class="sheet">
+    <div class="sh"><h3>دخول الإدارة</h3><button class="ib" onclick="document.getElementById('admin-login-bg').classList.remove('open')"><i class="fas fa-times"></i></button></div>
+    <div class="sb">
+      <input id="admin-pass" type="password" placeholder="كلمة سر الإدارة" style="width:100%;background:#0a0a0a;border:1px solid var(--line);border-radius:12px;padding:12px;color:#fff" dir="ltr">
+      <button class="chip" style="width:100%;margin-top:10px" onclick="V.adminLogin()">دخول</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+import { getFirestore, collection, doc, setDoc, getDoc, getDocs, query, orderBy, limit, onSnapshot, updateDoc, deleteDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDTsnFVRRas32lIdqKM8TnglNW1-VYTspQ",
+  authDomain: "ymmai-59c6c.firebaseapp.com",
+  projectId: "ymmai-59c6c",
+  storageBucket: "ymmai-59c6c.firebasestorage.app",
+  messagingSenderId: "598941300583",
+  appId: "1:598941300583:web:3aa6c28b51f8d6f9ffa1c2",
+  measurementId: "G-CNYL2F3T9N",
+  databaseURL: "https://ymmai-59c6c-default-rtdb.firebaseio.com"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+const APK = 'https://www.mediafire.com/file/qx4rmhtlfn0vxzj/YMMsocial.apk/file';
+const S = {
+  user:null, userData:null, usersMap:{}, reels:[], stories:[],
+  feed:'forYou', discover:'friends', activeReel:null, profileUid:null,
+  preferOwn: localStorage.getItem('ymm_video_prefer_own') !== '0',
+  secretClicks:0, isAdmin:false, unsub:null, storyIdx:0, storyGroup:[]
+};
+
+const $ = id => document.getElementById(id);
+window.$ = $;
+window.S = S;
+const toast = m => { const t=$('toast'); t.textContent=m; t.classList.add('on'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('on'),2200); };
+const av = u => u?.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(u?.displayName||'U')}&background=fe2c55&color=fff`;
+const fmt = n => { n=+n||0; if(n>=1e6) return (n/1e6).toFixed(1).replace(/\.0$/,'')+'M'; if(n>=1e3) return (n/1e3).toFixed(1).replace(/\.0$/,'')+'K'; return String(n); };
+const isOwn = r => r && (r.fromApp === 'ymm-video' || r.source === 'ymm-video');
+const isSocial = r => r && !isOwn(r);
+const canManageReel = r => !!(r && isOwn(r) && S.user && r.authorId === S.user.uid);
+window.canManageReel = canManageReel;
+const mediaList = r => {
+  if (Array.isArray(r.mediaUrls) && r.mediaUrls.length) return r.mediaUrls.filter(Boolean);
+  if (Array.isArray(r.images) && r.images.length) return r.images.filter(Boolean);
+  const one = r.mediaUrl || r.videoUrl || r.url || '';
+  return one ? [one] : [];
+};
+const isImageUrl = u => /\\.(jpg|jpeg|png|gif|webp|bmp)(\\?|$)/i.test(u||'') || (u||'').includes('image');
+
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+/** فيديوهات YMM Video أولاً، والسوشيال نادراً — إلا إذا مفيش غير السوشيال */
+function loadWatched(){
+  try{ return JSON.parse(localStorage.getItem('ymm_video_watched')||'[]'); }catch(e){ return []; }
+}
+function markWatched(id){
+  if(!id) return;
+  let arr = loadWatched().filter(x=>x!==id);
+  arr.unshift(id);
+  if(arr.length>400) arr=arr.slice(0,400);
+  try{ localStorage.setItem('ymm_video_watched', JSON.stringify(arr)); }catch(e){}
+}
+function videoHandle(uid){
+  // معرف خاص بـ YMM Video مختلف عن السوشيال
+  if(!uid) return '@v_user';
+  const u = S.usersMap[uid];
+  if(u && u.videoHandle) return u.videoHandle.startsWith('@')?u.videoHandle:('@'+u.videoHandle);
+  // ثابت من الـ uid
+  let h = 0;
+  for(let i=0;i<uid.length;i++) h = ((h<<5)-h)+uid.charCodeAt(i)|0;
+  const code = Math.abs(h).toString(36).slice(0,6);
+  return '@v_' + code;
+}
+
+function displayNameOf(u){
+  if(!u) return 'مستخدم';
+  return u.videoDisplayName || u.displayName || 'مستخدم';
+}
+function socialNameLine(u){
+  if(!u) return '';
+  const social = u.displayName || '';
+  const custom = u.videoDisplayName || '';
+  if(custom && social && custom !== social) return 'السوشيال: ' + social;
+  return '';
+}
+function getPrefs(){
+  try{ return JSON.parse(localStorage.getItem('ymm_video_prefs')||'{}'); }catch(e){ return {}; }
+}
+function setPref(k,v){
+  const p=getPrefs(); p[k]=v;
+  try{ localStorage.setItem('ymm_video_prefs', JSON.stringify(p)); }catch(e){}
+}
+function getSaved(){
+  try{ return JSON.parse(localStorage.getItem('ymm_video_saved')||'{"reels":[],"comments":[]}'); }catch(e){ return {reels:[],comments:[]}; }
+}
+function setSaved(obj){
+  try{ localStorage.setItem('ymm_video_saved', JSON.stringify(obj)); }catch(e){}
+}
+
+function socialProfileUrl(uid){
+  return 'https://www.socialcreator.com/youznet#/user/' + encodeURIComponent(uid||'');
+}
+function buildFeedList(){
+  let list = S.reels.slice().filter(r=>{
+    const priv = r.privacy || 'public';
+    if (priv === 'public') return true;
+    if (!S.user) return false;
+    if (r.authorId === S.user.uid) return true;
+    if (priv === 'followers') return (S.userData?.following||[]).includes(r.authorId) || (S.usersMap[r.authorId]?.followers||[]).includes(S.user.uid);
+    if (priv === 'private') return false;
+    return true;
+  });
+  if (S.feed === 'following') {
+    const fg = S.userData?.following || [];
+    list = list.filter(r => fg.includes(r.authorId) || r.authorId === S.user?.uid);
+  }
+  const own = list.filter(isOwn);
+  const social = list.filter(isSocial);
+  let base;
+  if (!S.preferOwn) base = list.slice();
+  else if (own.length === 0) base = social.length ? social.slice() : list.slice();
+  else {
+    let rare = [];
+    if (social.length) {
+      const shuffled = shuffle(social);
+      const n = Math.max(1, Math.min(3, Math.floor(own.length * 0.15) || 1));
+      rare = shuffled.slice(0, Math.min(n, shuffled.length));
+    }
+    base = own.concat(rare);
+  }
+  const watched = new Set(loadWatched());
+  const unwatched = base.filter(r => !watched.has(r.id));
+  const watchedOnes = base.filter(r => watched.has(r.id));
+  // قدّر غير المشاهد أولاً؛ لو مفيش غير المشاهد اعرض الكل
+  const ordered = (unwatched.length ? unwatched : base.slice());
+  return shuffle(ordered);
+}
+
+window.V = {
+  downloadSocial(){ window.open(APK, '_blank'); },
+
+  async login(){
+    const email = ($('email').value||'').trim();
+    const pass = $('pass').value||'';
+    const msg = $('auth-msg');
+    msg.textContent = '';
+    if(!email||!pass){ msg.textContent='أدخل بيانات حساب YMM Social'; return; }
+    $('btn-login').disabled = true;
+    try{
+      await signInWithEmailAndPassword(auth, email, pass);
+    }catch(e){
+      const code = e.code||'';
+      if (code.includes('user-not-found') || code.includes('invalid-credential') || code.includes('wrong-password')) {
+        msg.innerHTML = 'لا يوجد حساب بهذه البيانات على YMM Social.<br>حمّل السوشيال وأنشئ حساباً ثم عد للدخول.';
+      } else {
+        msg.textContent = e.message || 'فشل الدخول';
+      }
+    }
+    $('btn-login').disabled = false;
+  },
+
+  async logout(){ try{ await signOut(auth); }catch(e){} },
+
+  tab(name){
+    document.querySelectorAll('#nav button[data-t]').forEach(b=>b.classList.toggle('on', b.dataset.t===name));
+    ['home','discover','inbox','profile','settings','saved'].forEach(v=>{
+      const el = $('view-'+v);
+      if(!el) return;
+      el.classList.toggle('on', v===name);
+    });
+    if(name==='home') requestAnimationFrame(()=>V.observe());
+    if(name==='discover'){ V.renderStories(); V.renderDiscover(); }
+    if(name==='profile') V.openProfile(S.user?.uid);
+    if(name==='saved') V.renderSaved();
+  },
+
+  openSettings(){ V.tab('settings'); $('pref-label').textContent = S.preferOwn ? 'نعم' : 'لا'; V.syncToggles(); },
+  setFeedPref(){
+    S.preferOwn = !S.preferOwn;
+    localStorage.setItem('ymm_video_prefer_own', S.preferOwn ? '1' : '0');
+    $('pref-label').textContent = S.preferOwn ? 'نعم' : 'لا';
+    V.renderFeed();
+    toast(S.preferOwn ? 'أولوية لفيديوهات YMM Video' : 'خلط عادي');
+  },
+
+  setFeed(m){
+    S.feed = m;
+    document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on', b.dataset.f===m));
+    V.renderFeed();
+  },
+
+  secretTap(){
+    S.secretClicks++;
+    clearTimeout(S._secT);
+    S._secT = setTimeout(()=>S.secretClicks=0, 1200);
+    if (S.secretClicks >= 5) {
+      S.secretClicks = 0;
+      $('admin-login-bg').classList.add('open');
+      const inp=$('admin-pass'); if(inp){ inp.value=''; setTimeout(()=>inp.focus(),100); }
+    }
+  },
+  adminLogin(){
+    const p = ($('admin-pass').value||'').trim();
+    if(p === 'youzai'){
+      S.adminUnlocked = true;
+      document.getElementById('admin-login-bg').classList.remove('open');
+      V.openAdmin();
+      toast('مرحباً بالمدير');
+    } else {
+      toast('كلمة السر خطأ');
+    }
+  },
+
+
+  openAdmin(){
+    if(!S.adminUnlocked){ $('admin-login-bg').classList.add('open'); return; }
+    $('admin-info').textContent = `ريلز: ${S.reels.length} · خاص: ${S.reels.filter(isOwn).length} · سوشيال: ${S.reels.filter(isSocial).length}`;
+    $('adm-social-pref').textContent = S.preferOwn ? 'نعم (نادر)' : 'خلط';
+    $('admin-panel').classList.add('open');
+  },
+  closeAdmin(){ $('admin-panel').classList.remove('open'); },
+  adminRefresh(){ V.renderFeed(); toast('تم'); },
+  adminToggleSocial(){ V.setFeedPref(); $('adm-social-pref').textContent = S.preferOwn ? 'نعم (نادر)' : 'خلط'; },
+  async adminDeleteActive(){
+    const id = document.querySelector('.reel video.playing')?.closest('.reel')?.dataset?.id
+      || S.activeReel || S.reels[0]?.id;
+    if(!id || !confirm('حذف الريل؟')) return;
+    try{ await deleteDoc(doc(db,'reels',id)); toast('تم الحذف'); V.closeAdmin(); }catch(e){ toast('فشل الحذف'); }
+  },
+
+  renderStories(){
+    const box = $('stories-strip');
+    if(!box) return;
+    const byUser = {};
+    (S.stories||[]).forEach(s=>{
+      if(!s.authorId) return;
+      if(!byUser[s.authorId]) byUser[s.authorId]=[];
+      byUser[s.authorId].push(s);
+    });
+    // fallback: users with recent reels as "story-like"
+    if (!Object.keys(byUser).length) {
+      S.reels.slice(0,12).forEach(r=>{
+        if(!byUser[r.authorId]) byUser[r.authorId]=[{
+          id:'r_'+r.id, authorId:r.authorId, mediaUrl: mediaList(r)[0], type:'reel', createdAt:r.createdAt
+        }];
+      });
+    }
+    let html = `<div class="st add" onclick="V.openCreate()"><div class="ring"><i class="fas fa-plus"></i></div><div class="nm">قصتي</div></div>`;
+    Object.keys(byUser).slice(0,20).forEach(uid=>{
+      const u = S.usersMap[uid]||{};
+      html += `<div class="st" onclick='V.openStory(${JSON.stringify(uid)})'><div class="ring"><img src="${av(u)}"></div><div class="nm">${(u.displayName||'قصة').slice(0,8)}</div></div>`;
+    });
+    box.innerHTML = html;
+  },
+
+  openStory(uid){
+    const items = (S.stories||[]).filter(s=>s.authorId===uid);
+    const list = items.length ? items : S.reels.filter(r=>r.authorId===uid).slice(0,5).map(r=>({
+      authorId:uid, mediaUrl:mediaList(r)[0], type:'video'
+    }));
+    if(!list.length) return toast('لا قصص');
+    S.storyGroup = list;
+    S.storyIdx = 0;
+    $('story-viewer').classList.add('open');
+    V.paintStory();
+  },
+  paintStory(){
+    const s = S.storyGroup[S.storyIdx];
+    if(!s){ V.closeStory(); return; }
+    const u = S.usersMap[s.authorId]||{};
+    $('sv-av').src = av(u);
+    $('sv-name').textContent = u.displayName||'قصة';
+    const prog = $('story-progress');
+    prog.innerHTML = S.storyGroup.map((_,i)=>`<i class="${i<S.storyIdx?'':''}">${i===S.storyIdx?'<b style="width:100%"></b>':(i<S.storyIdx?'<b style="width:100%"></b>':'')}</i>`).join('');
+    const media = $('sv-media');
+    const url = s.mediaUrl || s.imageUrl || s.videoUrl || '';
+    if (isImageUrl(url) || s.type==='image') media.innerHTML = `<img src="${url.replace(/"/g,'&quot;')}" style="max-width:100%;max-height:100%;object-fit:contain">`;
+    else media.innerHTML = `<video src="${url.replace(/"/g,'&quot;')}" autoplay playsinline style="max-width:100%;max-height:100%"></video>`;
+    clearTimeout(S._storyT);
+    S._storyT = setTimeout(()=>{ S.storyIdx++; V.paintStory(); }, 4500);
+    media.onclick = (e)=>{
+      if(e.clientX < innerWidth/2){ S.storyIdx=Math.max(0,S.storyIdx-1); V.paintStory(); }
+      else { S.storyIdx++; V.paintStory(); }
+    };
+  },
+  closeStory(){ clearTimeout(S._storyT); $('story-viewer').classList.remove('open'); $('sv-media').innerHTML=''; },
+
+  renderFeed(){
+    const feed = $('feed');
+    const list = buildFeedList();
+    if(!list.length){
+      feed.innerHTML = '<div class="empty" style="height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px"><div>لا ريلز حالياً</div><button class="chip" onclick="V.openCreate()">انشر أول ريل</button></div>';
+      return;
+    }
+    feed.innerHTML = list.map(r=>{
+      const author = S.usersMap[r.authorId]||{displayName:'مستخدم'};
+      const likes = r.likes||[];
+      const liked = S.user && likes.includes(S.user.uid);
+      const comments = r.comments||[];
+      const medias = mediaList(r);
+      const following = S.userData?.following||[];
+      const isF = following.includes(r.authorId) || r.authorId===S.user?.uid;
+      const social = isSocial(r);
+      let mediaHtml = '';
+      if (medias.length > 1) {
+        mediaHtml = `<div class="slides" data-idx="0">${medias.map(m=>`<div class="slide">${isImageUrl(m)?`<img src="${m.replace(/"/g,'&quot;')}">`:`<video src="${m.replace(/"/g,'&quot;')}" playsinline loop muted></video>`}</div>`).join('')}</div>
+        <div class="dots">${medias.map((_,i)=>`<i class="${i===0?'on':''}"></i>`).join('')}</div>`;
+      } else {
+        const m = medias[0]||'';
+        mediaHtml = isImageUrl(m) || r.mediaType==='images'
+          ? `<img src="${(m||'').replace(/"/g,'&quot;')}">`
+          : `<video playsinline loop preload="metadata" ${m?`src="${m.replace(/"/g,'&quot;')}"`:''}></video>`;
+      }
+      return `<section class="reel" data-id="${r.id}" data-social="${social?'1':'0'}">
+        <div class="reel-media">${mediaHtml}</div>
+        <div class="grad"></div>
+        <div class="heart">❤</div>
+        <div class="side">
+          <div style="position:relative" onclick="V.openProfile('${r.authorId}')">
+            <img class="av" src="${av(author)}">${!isF?`<span class="plus" onclick="event.stopPropagation();V.follow('${r.authorId}')">+</span>`:''}
+          </div>
+          <button class="sbtn ${liked?'liked':''}" onclick="V.like('${r.id}')"><div class="c"><i class="${liked?'fas':'far'} fa-heart"></i></div><span>${fmt(likes.length)}</span></button>
+          <button class="sbtn" onclick="V.openCmt('${r.id}')"><div class="c"><i class="far fa-comment-dots"></i></div><span>${fmt(comments.length)}</span></button>
+          <button class="sbtn" onclick="V.share('${r.id}')"><div class="c"><i class="fas fa-share"></i></div><span>${fmt(r.shares||r.shareCount||0)}</span></button>
+          <button class="sbtn" onclick="V.repost('${r.id}')"><div class="c"><i class="fas fa-retweet"></i></div><span>إعادة</span></button>
+          <button class="sbtn" onclick="V.saveReel('${r.id}')"><div class="c"><i class="far fa-bookmark"></i></div><span>${fmt(r.saves||r.saveCount||0)}</span></button>
+          ${canManageReel(r)?`<button class="sbtn" onclick="V.openEdit('${r.id}')"><div class="c"><i class="fas fa-ellipsis-h"></i></div><span>إدارة</span></button>`:''}
+        </div>
+        <div class="meta">
+          <b onclick="V.openProfile('${r.authorId}')">${(displayNameOf(author)).replace(/</g,'')}</b>
+          <div class="name-social" onclick="V.openProfile('${r.authorId}')">${socialNameLine(author)}</div>
+          <span class="vid-handle" onclick="V.openProfile('${r.authorId}')">${videoHandle(r.authorId)}</span>
+          <div class="txt" onclick="this.classList.toggle('open')">${(r.text||r.caption||'').replace(/</g,'')}</div>
+          ${social
+            ? '<div class="badge-social"><i class="fas fa-share-alt"></i> YMM Social</div>'
+            : '<div class="badge-own"><i class="fas fa-video"></i> YMM Video</div>'}
+        </div>
+      </section>`;
+    }).join('');
+
+    // multi-image swipe
+    feed.querySelectorAll('.slides').forEach(sl=>{
+      let sx=0;
+      sl.addEventListener('touchstart', e=>{ sx=e.touches[0].clientX; }, {passive:true});
+      sl.addEventListener('touchend', e=>{
+        const dx = e.changedTouches[0].clientX - sx;
+        let idx = +sl.dataset.idx||0;
+        const n = sl.children.length;
+        if (Math.abs(dx)>40){ idx = dx<0 ? Math.min(n-1,idx+1) : Math.max(0,idx-1); }
+        sl.dataset.idx = idx;
+        [...sl.children].forEach((c,i)=>c.style.transform=`translateX(${(i-idx)*100}%)`);
+        // RTL: reverse visual — keep simple LTR slide inside
+        [...sl.children].forEach((c,i)=>{ c.style.transition='transform .25s'; c.style.transform=`translateX(${-(idx)*100}%)`; if(i===0) sl.style.transform=`translateX(${-idx*100}%)`; });
+        sl.style.transition='transform .25s';
+        sl.style.transform = `translateX(${-idx * 100}%)`;
+        const dots = sl.parentElement.querySelectorAll('.dots i');
+        dots.forEach((d,i)=>d.classList.toggle('on', i===idx));
+      });
+    });
+
+    feed.querySelectorAll('.reel').forEach(sec=>{
+      let last=0;
+      sec.addEventListener('click', e=>{
+        if(e.target.closest('button,a,.av,.plus,b')) return;
+        const now=Date.now();
+        if(now-last<280){
+          V.like(sec.dataset.id, true);
+          const h=sec.querySelector('.heart'); h.classList.add('pop'); setTimeout(()=>h.classList.remove('pop'),400);
+        }
+        last=now;
+      });
+    });
+    V.observe();
+  },
+
+  observe(){
+    const vids=[...document.querySelectorAll('#feed video')];
+    if(window._io) window._io.disconnect();
+    window._io=new IntersectionObserver(entries=>{
+      entries.forEach(en=>{
+        const v=en.target;
+        if(en.isIntersecting && en.intersectionRatio>0.6){
+          vids.forEach(x=>{ if(x!==v){ x.pause(); x.classList.remove('playing'); }});
+          v.muted=false; v.play().catch(()=>{v.muted=true;v.play().catch(()=>{});});
+          v.classList.add('playing');
+          const rid = v.closest('.reel')?.dataset?.id;
+          if(rid) markWatched(rid);
+        } else { v.pause(); v.classList.remove('playing'); }
+      });
+    },{threshold:[0.6]});
+    vids.forEach(v=>window._io.observe(v));
+  },
+
+  updateReelActionUI(id){
+    const r = S.reels.find(x=>x.id===id);
+    if(!r) return;
+    const sec = document.querySelector(`.reel[data-id="${CSS.escape(id)}"]`);
+    if(!sec) return;
+    const likes = r.likes||[];
+    const liked = S.user && likes.includes(S.user.uid);
+    const comments = r.comments||[];
+    const likeBtn = sec.querySelectorAll('.sbtn')[0];
+    const cmtBtn = sec.querySelectorAll('.sbtn')[1];
+    if(likeBtn){
+      likeBtn.classList.toggle('liked', !!liked);
+      const icon = likeBtn.querySelector('i');
+      if(icon){ icon.className = liked ? 'fas fa-heart' : 'far fa-heart'; }
+      const sp = likeBtn.querySelector('span');
+      if(sp) sp.textContent = fmt(likes.length);
+    }
+    if(cmtBtn){
+      const sp = cmtBtn.querySelector('span');
+      if(sp) sp.textContent = fmt(comments.length);
+    }
+  },
+
+  async like(id, force){
+    if(!S.user) return toast('سجّل الدخول');
+    const r=S.reels.find(x=>x.id===id); if(!r) return;
+    const likes=(r.likes||[]).slice();
+    const i=likes.indexOf(S.user.uid);
+    try{
+      if(i>=0 && !force){ await updateDoc(doc(db,'reels',id),{likes:arrayRemove(S.user.uid)}); likes.splice(i,1); }
+      else if(i<0){ await updateDoc(doc(db,'reels',id),{likes:arrayUnion(S.user.uid)}); likes.push(S.user.uid); }
+      r.likes=likes;
+      V.updateReelActionUI(id);
+    }catch(e){ toast('تعذر الإعجاب'); }
+  },
+
+  refreshFeed(){
+    // إعادة خلط وتصفية + الرجوع لأول فيديو
+    V.renderFeed();
+    const feed = $('feed');
+    if(feed) feed.scrollTo({ top:0, behavior:'smooth' });
+    toast('تم التحديث');
+  },
+
+  async follow(uid){
+    if(!S.user||!uid||uid===S.user.uid) return;
+    const fg=S.userData?.following||[];
+    const isF=fg.includes(uid);
+    try{
+      await updateDoc(doc(db,'users',S.user.uid),{following: isF?arrayRemove(uid):arrayUnion(uid)});
+      try{ await updateDoc(doc(db,'users',uid),{followers: isF?arrayRemove(S.user.uid):arrayUnion(S.user.uid)}); }catch(e){}
+      if(S.userData) S.userData.following = isF ? fg.filter(x=>x!==uid) : fg.concat([uid]);
+      toast(isF?'إلغاء المتابعة':'تمت المتابعة');
+      V.renderDiscover();
+      // حدّث زر المتابعة في الريل الظاهر فقط
+      document.querySelectorAll('.reel').forEach(sec=>{
+        const plus=sec.querySelector('.plus');
+        // optional leave as is until next natural refresh
+      });
+    }catch(e){ toast('تعذر المتابعة'); }
+  },
+
+  openCmt(id){
+    S.activeReel=id;
+    S.replyTo=null;
+    V.renderComments();
+    $('cmt-bg').classList.add('open');
+  },
+  closeCmt(){ $('cmt-bg').classList.remove('open'); S.replyTo=null; },
+
+  renderComments(){
+    const id = S.activeReel;
+    const r=S.reels.find(x=>x.id===id);
+    const social=isSocial(r);
+    const list=$('cmt-list');
+    const comments=r?.comments||[];
+    if(!comments.length){ list.innerHTML='<div class="empty">لا تعليقات</div>'; return; }
+    list.innerHTML = comments.map(c=>{
+      const u=S.usersMap[c.authorId]||{};
+      const fromSocial = social || c.fromApp==='social' || (!c.fromApp && isSocial(r));
+      const clikes = c.likes||[];
+      const liked = S.user && clikes.includes(S.user.uid);
+      const replies = c.replies||[];
+      const repliesHtml = replies.map(rp=>{
+        const ru=S.usersMap[rp.authorId]||{};
+        return `<div class="cmt" style="margin-bottom:8px"><img src="${av(ru)}"><div>
+          <b>${(ru.displayName||'مستخدم').replace(/</g,'')}</b>
+          <div style="font-size:12px;margin-top:2px">${(rp.text||'').replace(/</g,'')}</div>
+        </div></div>`;
+      }).join('');
+      return `<div class="cmt" data-cid="${c.id}"><img src="${av(u)}"><div style="flex:1;min-width:0">
+        <b>${(u.displayName||'مستخدم').replace(/</g,'')}</b>
+        <span class="vid-handle" style="margin-right:6px;font-size:10px">${videoHandle(c.authorId)}</span>
+        ${fromSocial?'<div class="from">تعليق من YMM Social</div>':''}
+        <div style="font-size:13px;margin-top:3px">${(c.text||'').replace(/</g,'')}</div>
+        <div class="cmt-actions">
+          <button type="button" class="${liked?'liked':''}" onclick="V.likeComment('${id}','${c.id}')"><i class="${liked?'fas':'far'} fa-heart"></i> ${fmt(clikes.length)}</button>
+          <button type="button" onclick="V.startReply('${c.id}')">رد</button>
+          <button type="button" onclick="V.saveComment('${id}','${c.id}')">حفظ</button>
+        </div>
+        ${repliesHtml?`<div class="replies">${repliesHtml}</div>`:''}
+      </div></div>`;
+    }).join('');
+  },
+
+  startReply(cid){
+    S.replyTo = cid;
+    const inp = $('cmt-in');
+    if(inp){ inp.placeholder = 'اكتب رداً...'; inp.focus(); }
+    toast('الرد على التعليق');
+  },
+
+  async likeComment(reelId, cmtId){
+    if(!S.user) return toast('سجّل الدخول');
+    const r = S.reels.find(x=>x.id===reelId); if(!r) return;
+    const comments = (r.comments||[]).map(c=>({...c, likes:(c.likes||[]).slice(), replies:(c.replies||[]).slice()}));
+    const c = comments.find(x=>String(x.id)===String(cmtId)); if(!c) return;
+    const i = (c.likes||[]).indexOf(S.user.uid);
+    if(i>=0) c.likes.splice(i,1); else c.likes.push(S.user.uid);
+    try{
+      await updateDoc(doc(db,'reels',reelId),{comments});
+      r.comments = comments;
+      V.renderComments();
+      V.updateReelActionUI(reelId);
+    }catch(e){ toast('تعذر الإعجاب بالتعليق'); }
+  },
+
+  async sendCmt(){
+    if(!S.user||!S.activeReel) return;
+    const text=($('cmt-in').value||'').trim(); if(!text) return;
+    const r=S.reels.find(x=>x.id===S.activeReel); if(!r) return;
+    const comments=(r.comments||[]).map(c=>({...c, likes:(c.likes||[]).slice(), replies:(c.replies||[]).map(x=>({...x}))}));
+    if(S.replyTo){
+      const c = comments.find(x=>String(x.id)===String(S.replyTo));
+      if(c){
+        c.replies = c.replies||[];
+        c.replies.push({ id:String(Date.now()), authorId:S.user.uid, text, createdAt:Date.now(), fromApp:'ymm-video' });
+      }
+      S.replyTo = null;
+    } else {
+      comments.push({ id:String(Date.now()), authorId:S.user.uid, text, createdAt:Date.now(), likes:[], replies:[], fromApp:'ymm-video' });
+    }
+    try{
+      await updateDoc(doc(db,'reels',r.id),{comments});
+      r.comments=comments; $('cmt-in').value=''; $('cmt-in').placeholder='أضف تعليقاً...';
+      V.renderComments();
+      V.updateReelActionUI(r.id);
+    }catch(e){ toast('فشل التعليق'); }
+  },
+
+  share(id){
+    const url=location.href.split('#')[0]+'#reel='+id;
+    if(navigator.share) navigator.share({title:'YMM Video',url}).catch(()=>{});
+    else { navigator.clipboard?.writeText(url); toast('تم نسخ الرابط'); }
+  },
+
+  openCreate(){ $('create-bg').classList.add('open'); },
+  closeCreate(){ $('create-bg').classList.remove('open'); },
+
+    async publish(){
+    if(!S.user) return toast('سجّل الدخول');
+    const videoFile=$('f-video').files?.[0];
+    const thumbFile=$('f-thumb')?.files?.[0];
+    const imageFiles=[...($('f-images').files||[])];
+    const videoUrl=($('f-video-url')?.value||'').trim();
+    const thumbUrlInput=($('f-thumb-url')?.value||'').trim();
+    const urlLines=($('f-urls').value||'').split('\n').map(s=>s.trim()).filter(Boolean);
+    const text=($('f-text').value||'').trim();
+    const privacy=($('f-privacy')?.value||'public');
+    let mediaUrls=[...urlLines];
+    if(videoUrl) mediaUrls.unshift(videoUrl);
+    let thumbUrl = thumbUrlInput;
+    try{
+      // صورة مصغرة إلزامية
+      if(!thumbFile && !thumbUrl){
+        toast('أضف صورة مصغرة قبل النشر');
+        return;
+      }
+      toast('جاري الرفع...');
+      if(thumbFile){
+        const tref=sRef(storage, `reels/${S.user.uid}/thumb_${Date.now()}_${thumbFile.name}`);
+        await uploadBytes(tref, thumbFile);
+        thumbUrl = await getDownloadURL(tref);
+      }
+      if(videoFile){
+        const ref=sRef(storage, `reels/${S.user.uid}/${Date.now()}_${videoFile.name}`);
+        await uploadBytes(ref, videoFile);
+        mediaUrls.unshift(await getDownloadURL(ref));
+      }
+      for(const img of imageFiles){
+        const ref=sRef(storage, `reels/${S.user.uid}/${Date.now()}_${img.name}`);
+        await uploadBytes(ref, img);
+        mediaUrls.push(await getDownloadURL(ref));
+      }
+      mediaUrls=[...new Set(mediaUrls.filter(Boolean))];
+      if(!mediaUrls.length) return toast('أضف فيديو أو صور أو روابط');
+      if(!thumbUrl) return toast('الصورة المصغرة مطلوبة');
+      const id=`v_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,7)}`;
+      const data={
+        id, authorId:S.user.uid,
+        mediaUrl: mediaUrls[0],
+        mediaUrls,
+        thumb: thumbUrl,
+        thumbnail: thumbUrl,
+        mediaType: imageFiles.length && !videoFile && !videoUrl ? 'images' : (mediaUrls.length>1?'gallery':'video'),
+        text, caption: text,
+        privacy,
+        likes:[], comments:[], views:0, createdAt:Date.now(),
+        fromApp:'ymm-video', source:'ymm-video'
+      };
+      await setDoc(doc(db,'reels',id), data);
+      S.reels.unshift(data);
+      V.closeCreate();
+      ['f-video','f-images','f-thumb'].forEach(id=>{ const el=$(id); if(el) el.value=''; });
+      ['f-urls','f-text','f-video-url','f-thumb-url'].forEach(id=>{ const el=$(id); if(el) el.value=''; });
+      const pv=$('thumb-preview'); if(pv){ pv.classList.add('hide'); pv.removeAttribute('src'); }
+      toast('تم النشر على YMM Video');
+      V.tab('home'); V.renderFeed();
+    }catch(e){ console.error(e); toast('فشل الرفع — تحقق من Storage'); }
+  },
+
+  discoverTab(t){
+    S.discover=t;
+    document.querySelectorAll('.seg button').forEach(b=>b.classList.toggle('on', b.dataset.d===t));
+    V.renderDiscover();
+  },
+  renderDiscover(){
+    const box=$('discover-list');
+    const fg = new Set(S.userData?.following||[]);
+    const friends = new Set(S.userData?.friends||S.userData?.friendIds||[]);
+    let users=Object.values(S.usersMap).filter(u=>u.uid && u.uid!==S.user?.uid);
+    if(S.discover==='following') users=users.filter(u=>fg.has(u.uid));
+    else if(S.discover==='friends') users=users.filter(u=>friends.has(u.uid) || fg.has(u.uid));
+    else users=users.filter(u=>!fg.has(u.uid)).slice(0,40);
+    box.innerHTML = users.length ? users.map(u=>{
+      const isF=fg.has(u.uid);
+      return `<div class="row">
+        <img src="${av(u)}" onclick="V.openProfile('${u.uid}')">
+        <div class="t" onclick="V.openProfile('${u.uid}')"><b>${(u.displayName||'مستخدم').replace(/</g,'')}</b><span>${S.discover==='following'?'تتابعه':(S.discover==='friends'?'صديق / متابَع':'مقترح')}</span></div>
+        <button class="${isF?'ghost':'chip'}" onclick="V.follow('${u.uid}')">${isF?'يتابع':'متابعة'}</button>
+      </div>`;
+    }).join('') : `<div class="empty">${S.discover==='following'?'لسه ما تابعتش حد':'لا نتائج'}</div>`;
+  },
+
+  async openProfile(uid){
+    if(!uid) return;
+    S.profileUid=uid;
+    V.tab('profile');
+    let u=S.usersMap[uid];
+    if(!u){
+      try{ const sn=await getDoc(doc(db,'users',uid)); if(sn.exists()){ u={uid,...sn.data()}; S.usersMap[uid]=u; } }catch(e){}
+    }
+    u=u||{uid,displayName:'مستخدم'};
+    $('p-av').src=av(u);
+    $('p-name').textContent=displayNameOf(u);
+    const psn=$('p-social-name');
+    if(psn){ const sn=socialNameLine(u); psn.textContent=sn; psn.style.display=sn?'block':'none'; }
+    /* video handle set below */
+    $('p-title').textContent=uid===S.user?.uid?'حسابي':(u.displayName||'حساب');
+    $('p-fg').textContent=fmt((u.following||[]).length);
+    $('p-fr').textContent=fmt((u.followers||[]).length);
+    const mine=S.reels.filter(r=>r.authorId===uid);
+    $('p-lk').textContent=fmt(mine.reduce((s,r)=>s+(r.likes||[]).length,0));
+    $('p-handle').innerHTML = `<span class="vid-handle">${videoHandle(uid)}</span>`;
+    const socialBtn = `<button class="ghost" onclick="window.open('${socialProfileUrl(uid)}','_blank')"><i class="fas fa-external-link-alt"></i> حساب السوشيال</button>`;
+    $('p-actions').innerHTML = uid===S.user?.uid
+      ? `<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="ghost" onclick="V.openCreate()">رفع ريل</button>${socialBtn}</div>`
+      : `<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="chip" onclick="V.follow('${uid}')">${(S.userData?.following||[]).includes(uid)?'يتابع':'متابعة'}</button>${socialBtn}</div>`;
+    $('p-grid').innerHTML = mine.length ? mine.map(r=>{
+      const m=mediaList(r)[0]||'';
+      return `<div class="cell" onclick="V.tab('home')">${isImageUrl(m)?`<img src="${m.replace(/"/g,'&quot;')}">`:`<video src="${m.replace(/"/g,'&quot;')}" muted></video>`}</div>`;
+    }).join('') : '<div class="empty" style="grid-column:1/-1">لا ريلز</div>';
+  }
+};
+
+// backdrop close
+
+const thumbInput = $('f-thumb');
+if(thumbInput){
+  thumbInput.addEventListener('change', ()=>{
+    const f = thumbInput.files?.[0];
+    const img = $('thumb-preview');
+    if(!f||!img) return;
+    img.src = URL.createObjectURL(f);
+    img.classList.remove('hide');
+  });
+}
+const thumbUrl = $('f-thumb-url');
+if(thumbUrl) thumbUrl.addEventListener('input', ()=>V.previewThumbUrl());
+
+['create-bg','cmt-bg'].forEach(id=>{
+  $(id).addEventListener('click', e=>{ if(e.target.id===id) e.currentTarget.classList.remove('open'); });
+});
+$('admin-panel').addEventListener('click', e=>{ if(e.target.id==='admin-panel') V.closeAdmin(); });
+
+async function loadUsers(){
+  try{
+    const snap=await getDocs(query(collection(db,'users'), limit(250)));
+    snap.forEach(d=>{ S.usersMap[d.id]={uid:d.id,...d.data()}; });
+  }catch(e){}
+}
+async function loadStories(){
+  try{
+    const snap=await getDocs(collection(db,'stories'));
+    S.stories = snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  }catch(e){ S.stories=[]; }
+  V.renderStories();
+}
+function listenReels(){
+  if(S.unsub) S.unsub();
+  try{
+    const qy=query(collection(db,'reels'), orderBy('createdAt','desc'), limit(100));
+    S.unsub=onSnapshot(qy, snap=>{
+      const next=snap.docs.map(d=>({id:d.id,...d.data()}));
+      const first = !S.reels.length || !document.querySelector('#feed .reel');
+      S.reels=next;
+      if(first) V.renderFeed();
+      else {
+        // حدّث أرقام التفاعل فقط بدون إعادة بناء الفيد
+        next.forEach(r=>{ try{ V.updateReelActionUI(r.id); }catch(e){} });
+      }
+      V.renderStories();
+    }, async ()=>{
+      const snap=await getDocs(collection(db,'reels'));
+      S.reels=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+      V.renderFeed();
+    });
+  }catch(e){}
+}
+async function loadMe(){
+  if(!S.user) return;
+  try{
+    const sn=await getDoc(doc(db,'users',S.user.uid));
+    if(sn.exists()){
+      S.userData={uid:S.user.uid,...sn.data()};
+      S.usersMap[S.user.uid]=S.userData;
+      S.isAdmin = !!(S.userData.isAdmin || S.userData.role==='admin');
+    } else {
+      // حساب Auth موجود لكن بدون وثيقة؟ نسمح بالدخول ونبني الحد الأدنى
+      S.userData={uid:S.user.uid,displayName:S.user.displayName||'مستخدم',email:S.user.email||'',following:[],followers:[],photoURL:S.user.photoURL||''};
+      S.usersMap[S.user.uid]=S.userData;
+      try{ await setDoc(doc(db,'users',S.user.uid), S.userData, {merge:true}); }catch(e){}
+    }
+  }catch(e){}
+}
+
+
+// ===== enhancements: admin, edit, trend, search, accounts, lag =====
+function topicFromReel(r){
+  const text = (r?.text || r?.caption || '').trim();
+  if(!text) return [];
+  const tags = text.match(/#[\w\u0600-\u06FF]+/g) || [];
+  const words = text.replace(/#[\w\u0600-\u06FF]+/g,' ').split(/\s+/).filter(w=>w.length>2).slice(0,4);
+  return [...new Set(tags.concat(words))].slice(0,6);
+}
+function recordWatchTopics(reelId){
+  const r = S.reels.find(x=>x.id===reelId);
+  if(!r) return;
+  const topics = topicFromReel(r);
+  if(!topics.length) return;
+  let map = {};
+  try{ map = JSON.parse(localStorage.getItem('ymm_video_topic_stats')||'{}'); }catch(e){}
+  topics.forEach(tp=>{
+    map[tp] = (map[tp]||0) + 1;
+  });
+  try{ localStorage.setItem('ymm_video_topic_stats', JSON.stringify(map)); }catch(e){}
+  S.lastWatchTopics = topics;
+}
+function topTopics(n){
+  let map={};
+  try{ map=JSON.parse(localStorage.getItem('ymm_video_topic_stats')||'{}'); }catch(e){}
+  return Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,n||8).map(x=>x[0]);
+}
+function getAccounts(){
+  try{ return JSON.parse(localStorage.getItem('ymm_video_accounts')||'[]'); }catch(e){ return []; }
+}
+function setAccounts(arr){
+  try{ localStorage.setItem('ymm_video_accounts', JSON.stringify(arr)); }catch(e){}
+}
+
+V.openSearch = function(){
+  $('search-bg').classList.add('open');
+  V.renderSearchSuggest();
+  V.runSearch();
+};
+V.renderSearchSuggest = function(){
+  const box = $('search-suggest');
+  if(!box) return;
+  const topics = (S.lastWatchTopics && S.lastWatchTopics.length) ? S.lastWatchTopics : topTopics(6);
+  if(!topics.length){ box.innerHTML = ''; return; }
+  box.innerHTML = '<div style="font-size:12px;color:#9ca3af;margin-bottom:6px">مقترحات بعد المشاهدة / الأكثر بحثاً</div>' +
+    topics.map(tp=>`<button type="button" onclick="document.getElementById('search-q').value='${String(tp).replace(/'/g,"\\'")}';V.runSearch()">${String(tp).replace(/</g,'')}</button>`).join('');
+};
+V.runSearch = function(){
+  const q = ($('search-q')?.value||'').trim().toLowerCase();
+  const box = $('search-results');
+  if(!box) return;
+  if(q){
+    let map={}; try{ map=JSON.parse(localStorage.getItem('ymm_video_topic_stats')||'{}'); }catch(e){}
+    map[q]=(map[q]||0)+1;
+    try{ localStorage.setItem('ymm_video_topic_stats', JSON.stringify(map)); }catch(e){}
+  }
+  const users = Object.values(S.usersMap).filter(u => !q || (displayNameOf(u)+' '+(u.displayName||'')+' '+(u.videoHandle||'')).toLowerCase().includes(q)).slice(0,15);
+  const reels = S.reels.filter(r => !q || ((r.text||r.caption||'')+' '+(S.usersMap[r.authorId]?.displayName||'')).toLowerCase().includes(q)).slice(0,20);
+  let html='';
+  if(users.length){
+    html += '<div style="color:#9ca3af;font-size:12px;margin:8px 0">حسابات</div>';
+    html += users.map(u=>`<div class="row" onclick="document.getElementById('search-bg').classList.remove('open');V.openProfile('${u.uid}')"><img src="${av(u)}"><div class="t"><b>${displayNameOf(u).replace(/</g,'')}</b><span>${videoHandle(u.uid)}</span></div></div>`).join('');
+  }
+  if(reels.length){
+    html += '<div style="color:#9ca3af;font-size:12px;margin:8px 0">فيديوهات</div>';
+    html += reels.map(r=>{
+      const a=S.usersMap[r.authorId]||{};
+      return `<div class="row" onclick="document.getElementById('search-bg').classList.remove('open');V.tab('home')"><img src="${av(a)}"><div class="t"><b>${displayNameOf(a).replace(/</g,'')}</b><span>${(r.text||'').slice(0,50).replace(/</g,'')}</span></div></div>`;
+    }).join('');
+  }
+  box.innerHTML = html || '<div class="empty">لا نتائج</div>';
+};
+
+V.openTrending = function(){
+  const scored = S.reels.map(r=>{
+    const score = (r.likes||[]).length*3 + (r.comments||[]).length*2 + (r.views||r.viewCount||0) + (r.saves||r.saveCount||0)*2 + (r.shares||r.shareCount||0)*2;
+    return {r, score};
+  }).sort((a,b)=>b.score-a.score).slice(0,30);
+  const box = $('trend-list');
+  box.innerHTML = scored.length ? scored.map(({r,score},i)=>{
+    const a=S.usersMap[r.authorId]||{};
+    return `<div class="row" onclick="document.getElementById('trend-bg').classList.remove('open');V.jumpToReel('${r.id}')">
+      <div style="width:28px;font-weight:900;color:#fe2c55">${i+1}</div>
+      <img src="${av(a)}"><div class="t"><b>${displayNameOf(a).replace(/</g,'')}</b><span>${(r.text||'بدون وصف').slice(0,40).replace(/</g,'')} · ${fmt(score)} نقطة</span></div>
+    </div>`;
+  }).join('') : '<div class="empty">لا بيانات بعد</div>';
+  $('trend-bg').classList.add('open');
+};
+V.openProfileTrending = function(uid){
+  S.profileTrendUid = uid || S.profileUid;
+  const list = S.reels.filter(r=>r.authorId===S.profileTrendUid).map(r=>{
+    const score=(r.likes||[]).length*3+(r.comments||[]).length*2+(r.views||0)+(r.saves||0)*2+(r.shares||0)*2;
+    return {r,score};
+  }).sort((a,b)=>b.score-a.score);
+  const box = $('trend-list');
+  box.innerHTML = '<div style="font-size:12px;color:#9ca3af;margin-bottom:8px">رائج هذا الحساب</div>' + (list.length? list.map(({r},i)=>`<div class="row" onclick="document.getElementById('trend-bg').classList.remove('open');V.jumpToReel('${r.id}')"><div style="width:28px;color:#fe2c55;font-weight:900">${i+1}</div><div class="t"><b>${(r.text||'ريل').slice(0,40).replace(/</g,'')}</b><span>${fmt((r.likes||[]).length)} إعجاب</span></div></div>`).join('') : '<div class="empty">لا ريلز</div>');
+  $('trend-bg').classList.add('open');
+};
+V.jumpToReel = function(id){
+  V.tab('home');
+  setTimeout(()=>{
+    const el = document.querySelector(`.reel[data-id="${CSS.escape(id)}"]`);
+    if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+  }, 200);
+};
+
+V.openEdit = function(id){
+  const r = S.reels.find(x=>x.id===id);
+  if(!r || !canManageReel(r)) return toast('يمكن تعديل فيديوهات YMM Video الخاصة بك فقط');
+  $('edit-id').value = id;
+  $('edit-text').value = r.text || r.caption || '';
+  $('edit-bg').classList.add('open');
+};
+V.saveEdit = async function(){
+  const id = $('edit-id').value;
+  const r = S.reels.find(x=>x.id===id);
+  if(!r || !canManageReel(r)) return toast('غير مسموح');
+  const text = ($('edit-text').value||'').trim();
+  try{
+    await updateDoc(doc(db,'reels',id), { text, caption: text, updatedAt: Date.now() });
+    r.text = text; r.caption = text;
+    document.getElementById('edit-bg').classList.remove('open');
+    toast('تم التعديل');
+    V.updateReelActionUI(id);
+    // update text on card
+    const sec = document.querySelector(`.reel[data-id="${CSS.escape(id)}"] .txt`);
+    if(sec) sec.textContent = text;
+  }catch(e){ toast('فشل التعديل'); }
+};
+V.deleteReel = async function(){
+  const id = $('edit-id').value;
+  const r = S.reels.find(x=>x.id===id);
+  if(!r || !canManageReel(r)) return toast('غير مسموح — فيديوهات السوشيال تُدار من السوشيال فقط');
+  if(!confirm('حذف هذا الريل نهائياً؟')) return;
+  try{
+    await deleteDoc(doc(db,'reels',id));
+    S.reels = S.reels.filter(x=>x.id!==id);
+    document.getElementById('edit-bg').classList.remove('open');
+    toast('تم الحذف');
+    V.renderFeed();
+  }catch(e){ toast('فشل الحذف'); }
+};
+
+// wrap share/save to increment counts
+const _share = V.share;
+V.share = async function(id){
+  const r = S.reels.find(x=>x.id===id);
+  if(r){
+    r.shares = (r.shares||r.shareCount||0)+1;
+    r.shareCount = r.shares;
+    try{ await updateDoc(doc(db,'reels',id), { shares: r.shares, shareCount: r.shares }); }catch(e){}
+    V.updateReelActionUI(id);
+    // update share span
+    const sec=document.querySelector(`.reel[data-id="${CSS.escape(id)}"]`);
+    if(sec){
+      const spans=[...sec.querySelectorAll('.sbtn span')];
+      // fragile; re-query by icon
+      sec.querySelectorAll('.sbtn').forEach(btn=>{
+        if(btn.innerHTML.includes('fa-share')){
+          const sp=btn.querySelector('span'); if(sp) sp.textContent=fmt(r.shares);
+        }
+      });
+    }
+  }
+  if(_share) _share(id);
+};
+const _save = V.saveReel;
+V.saveReel = async function(id){
+  if(_save) _save(id);
+  const r = S.reels.find(x=>x.id===id);
+  if(r){
+    r.saves = (r.saves||r.saveCount||0)+1;
+    r.saveCount = r.saves;
+    try{ await updateDoc(doc(db,'reels',id), { saves: r.saves, saveCount: r.saves }); }catch(e){}
+    const sec=document.querySelector(`.reel[data-id="${CSS.escape(id)}"]`);
+    if(sec){
+      sec.querySelectorAll('.sbtn').forEach(btn=>{
+        if(btn.innerHTML.includes('fa-bookmark')){
+          const sp=btn.querySelector('span'); if(sp) sp.textContent=fmt(r.saves);
+        }
+      });
+    }
+  }
+};
+
+V.openAccounts = function(){
+  const list = getAccounts();
+  const box = $('accounts-list');
+  box.innerHTML = list.length ? list.map((a,i)=>`<div class="row" onclick="V.switchAccount(${i})">
+    <div class="t"><b>${(a.email||'').replace(/</g,'')}</b><span>${a.uid===S.user?.uid?'الحساب الحالي':'اضغط للتبديل'}</span></div>
+  </div>`).join('') : '<div class="empty">لا حسابات محفوظة بعد — أضف حساباً بالأسفل</div>';
+  $('accounts-bg').classList.add('open');
+};
+V.addAccount = async function(){
+  const email=($('acc-email').value||'').trim();
+  const pass=$('acc-pass').value||'';
+  if(!email||!pass) return toast('أدخل البيانات');
+  try{
+    await signInWithEmailAndPassword(auth, email, pass);
+    const list = getAccounts().filter(a=>a.email!==email);
+    list.unshift({ email, pass, uid: auth.currentUser?.uid||'' });
+    setAccounts(list.slice(0,8));
+    toast('تمت إضافة الحساب');
+    document.getElementById('accounts-bg').classList.remove('open');
+  }catch(e){ toast('فشل الدخول'); }
+};
+V.switchAccount = async function(idx){
+  const list = getAccounts();
+  const a = list[idx];
+  if(!a) return;
+  try{
+    await signOut(auth);
+    await signInWithEmailAndPassword(auth, a.email, a.pass);
+    toast('تم التبديل');
+    document.getElementById('accounts-bg').classList.remove('open');
+  }catch(e){ toast('تعذر التبديل — أعد إدخال كلمة المرور'); }
+};
+
+// reduce lag
+const _tg = V.togglePref;
+V.togglePref = function(key){
+  if(_tg) _tg(key);
+  if(key==='reduceLag'){
+    const on = !!getPrefs().reduceLag;
+    document.body.classList.toggle('reduce-lag', on);
+    const el=$('tg-lag'); if(el) el.classList.toggle('on', on);
+    // pause non-visible aggressively
+    if(on){
+      document.querySelectorAll('#feed video').forEach(v=>{ v.preload='none'; if(!v.classList.contains('playing')) v.removeAttribute('src'); });
+    }
+  }
+};
+V.syncToggles = (function(orig){
+  return function(){
+    if(orig) orig();
+    const p=getPrefs();
+    const lag=$('tg-lag'); if(lag) lag.classList.toggle('on', !!p.reduceLag);
+    document.body.classList.toggle('reduce-lag', !!p.reduceLag);
+  };
+})(V.syncToggles);
+
+// mark watched topics
+const _obs = V.observe;
+V.observe = function(){
+  const vids=[...document.querySelectorAll('#feed video')];
+  if(window._io) window._io.disconnect();
+  window._io=new IntersectionObserver(entries=>{
+    entries.forEach(en=>{
+      const v=en.target;
+      if(en.isIntersecting && en.intersectionRatio>0.6){
+        vids.forEach(x=>{ if(x!==v){ x.pause(); x.classList.remove('playing'); }});
+        v.muted=false; v.play().catch(()=>{v.muted=true;v.play().catch(()=>{});});
+        v.classList.add('playing');
+        const rid = v.closest('.reel')?.dataset?.id;
+        if(rid){ markWatched(rid); recordWatchTopics(rid); }
+      } else { v.pause(); v.classList.remove('playing'); }
+    });
+  },{threshold:[0.6]});
+  vids.forEach(v=>window._io.observe(v));
+};
+
+// enhance openProfile with bio, photo edit, trend btn
+const _op = V.openProfile;
+V.openProfile = async function(uid){
+  await _op(uid);
+  const u = S.usersMap[uid]||{};
+  const bioEl = $('p-bio');
+  if(bioEl) bioEl.textContent = u.videoBio || u.bio || 'لا يوجد وصف بعد';
+  // photo: prefer videoPhotoURL
+  const avEl = $('p-av');
+  if(avEl) avEl.src = u.videoPhotoURL || av(u);
+  const actions = $('p-actions');
+  if(actions){
+    const isMe = uid===S.user?.uid;
+    const socialBtn = `<button class="ghost" onclick="window.open('https://www.socialcreator.com/youznet#/user/${encodeURIComponent(uid)}','_blank')">حساب السوشيال</button>`;
+    const trendBtn = `<button class="ghost" onclick="V.openProfileTrending('${uid}')"><i class="fas fa-fire" style="color:#fe2c55"></i> الرائج</button>`;
+    const editBtn = isMe ? `<button class="ghost" onclick="V.editProfileMeta()">تعديل الوصف/الصورة</button>` : '';
+    const nameBtn = isMe ? `<button class="ghost" onclick="V.editDisplayName()">تغيير الاسم</button>` : '';
+    const followBtn = isMe ? `<button class="ghost" onclick="V.openCreate()">رفع ريل</button>` : `<button class="chip" onclick="V.follow('${uid}')">${(S.userData?.following||[]).includes(uid)?'يتابع':'متابعة'}</button>`;
+    actions.innerHTML = `<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">${followBtn}${trendBtn}${editBtn}${nameBtn}${socialBtn}</div>`;
+  }
+};
+V.editProfileMeta = async function(){
+  if(!S.user) return;
+  const bio = prompt('وصف الحساب في YMM Video:', S.userData?.videoBio || S.userData?.bio || '');
+  if(bio==null) return;
+  const photo = prompt('رابط صورة الحساب في YMM Video (اتركه فارغاً للإبقاء):', S.userData?.videoPhotoURL || '');
+  const data = { videoBio: bio.trim() };
+  if(photo && photo.trim()) data.videoPhotoURL = photo.trim();
+  try{
+    await updateDoc(doc(db,'users', S.user.uid), data);
+    Object.assign(S.userData, data);
+    if(S.usersMap[S.user.uid]) Object.assign(S.usersMap[S.user.uid], data);
+    toast('تم الحفظ');
+    V.openProfile(S.user.uid);
+  }catch(e){ toast('فشل الحفظ'); }
+};
+
+// save current account on login
+const _prevAuth = onAuthStateChanged;
+
+
+/* ===== MISSING METHODS + HARDENING ===== */
+V.openCatbox = function(){
+  try { window.open('https://catbox.moe', '_blank'); }
+  catch(e){ location.href = 'https://catbox.moe'; }
+};
+V.promptLink = function(fieldId){
+  var v = prompt('الصق رابط الملف (Catbox أو رابط مباشر):');
+  if (v == null) return;
+  var el = document.getElementById(fieldId);
+  if (!el) return;
+  v = String(v).trim();
+  if (el.tagName === 'TEXTAREA') {
+    el.value = (el.value ? el.value.trim() + '\n' : '') + v;
+  } else {
+    el.value = v;
+    if (fieldId === 'f-thumb-url' && V.previewThumbUrl) V.previewThumbUrl();
+  }
+};
+V.previewThumbUrl = function(){
+  var url = ((document.getElementById('f-thumb-url')||{}).value || '').trim();
+  var img = document.getElementById('thumb-preview');
+  if (!img) return;
+  if (url) { img.src = url; img.classList.remove('hide'); }
+  else { img.classList.add('hide'); }
+};
+V.editDisplayName = async function(){
+  if (!S.user) return toast('سجّل الدخول');
+  var cur = (S.userData && S.userData.videoDisplayName) || '';
+  var social = (S.userData && S.userData.displayName) || S.user.displayName || '';
+  var name = prompt('اسمك في YMM Video (اسم السوشيال يظهر تحته):', cur || social);
+  if (name == null) return;
+  try {
+    await updateDoc(doc(db, 'users', S.user.uid), { videoDisplayName: name.trim() });
+    if (S.userData) S.userData.videoDisplayName = name.trim();
+    if (S.usersMap[S.user.uid]) S.usersMap[S.user.uid].videoDisplayName = name.trim();
+    toast('تم حفظ الاسم');
+    if (S.profileUid === S.user.uid) V.openProfile(S.user.uid);
+  } catch (e) { toast('تعذر الحفظ'); }
+};
+V.savedTab = function(tab){
+  S.savedTab = tab || 'reels';
+  document.querySelectorAll('#view-saved .seg button').forEach(function(b){
+    b.classList.toggle('on', b.getAttribute('data-sv') === S.savedTab);
+  });
+  V.renderSaved();
+};
+V.renderSaved = function(){
+  var box = document.getElementById('saved-box');
+  if (!box) return;
+  var s = (typeof getSaved === 'function') ? getSaved() : { reels: [], comments: [] };
+  var tab = S.savedTab || 'reels';
+  if (tab === 'comments') {
+    var list = s.comments || [];
+    box.innerHTML = list.length ? list.map(function(c){
+      return '<div class="row"><div class="t"><b>تعليق محفوظ</b><span>' + String(c.text||'').replace(/</g,'') + '</span></div>' +
+        '<button class="ghost" onclick="V.openCmt(\'' + String(c.reelId||'') + '\')">فتح</button></div>';
+    }).join('') : '<div class="empty">لا تعليقات محفوظة</div>';
+    return;
+  }
+  var ids = s.reels || [];
+  var reels = ids.map(function(id){ return S.reels.find(function(r){ return r && r.id === id; }); }).filter(Boolean);
+  if (!reels.length) { box.innerHTML = '<div class="empty">لا فيديوهات محفوظة</div>'; return; }
+  box.innerHTML = '<div class="grid">' + reels.map(function(r){
+    var m = r.thumb || r.thumbnail || (typeof mediaList === 'function' ? (mediaList(r)[0]||'') : (r.mediaUrl||''));
+    return '<div class="cell" onclick="V.jumpToReel && V.jumpToReel(\'' + r.id + '\')"><img src="' + String(m).replace(/"/g,'&quot;') + '" onerror="this.style.background=\'#222\'"></div>';
+  }).join('') + '</div>';
+};
+V.saveComment = function(reelId, cmtId){
+  var r = S.reels.find(function(x){ return x && String(x.id)===String(reelId); });
+  var c = ((r && r.comments) || []).find(function(x){ return String(x.id)===String(cmtId); });
+  var text = (c && c.text) || '';
+  var s = (typeof getSaved === 'function') ? getSaved() : { reels: [], comments: [] };
+  s.comments = (s.comments || []).filter(function(x){ return !(x.reelId===reelId && x.cmtId===cmtId); });
+  s.comments.unshift({ reelId: reelId, cmtId: cmtId, text: text, at: Date.now() });
+  if (typeof setSaved === 'function') setSaved(s);
+  toast('تم حفظ التعليق');
+};
+if (!V.saveReel) {
+  V.saveReel = function(id){
+    var s = (typeof getSaved === 'function') ? getSaved() : { reels: [], comments: [] };
+    if ((s.reels || []).indexOf(id) < 0) s.reels.unshift(id);
+    if (typeof setSaved === 'function') setSaved(s);
+    toast('تم الحفظ');
+  };
+}
+V.repost = async function(id){
+  if (!S.user) return toast('سجّل الدخول');
+  var src = S.reels.find(function(x){ return x && x.id === id; });
+  if (!src) return;
+  if (!confirm('إعادة نشر هذا الريل على حسابك؟')) return;
+  try {
+    var newId = 'v_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 7);
+    var mediaUrl = src.mediaUrl || (src.mediaUrls && src.mediaUrls[0]) || '';
+    var data = {
+      id: newId,
+      authorId: S.user.uid,
+      mediaUrl: mediaUrl,
+      mediaUrls: src.mediaUrls || (mediaUrl ? [mediaUrl] : []),
+      thumb: src.thumb || src.thumbnail || '',
+      thumbnail: src.thumb || src.thumbnail || '',
+      text: src.text || src.caption || '',
+      caption: src.caption || src.text || '',
+      likes: [], comments: [], views: 0, shares: 0, saves: 0,
+      createdAt: Date.now(),
+      fromApp: 'ymm-video', source: 'ymm-video',
+      repostOf: src.id, repostFrom: src.authorId, privacy: 'public'
+    };
+    await setDoc(doc(db, 'reels', newId), data);
+    S.reels.unshift(data);
+    toast('تمت إعادة النشر');
+    V.renderFeed();
+  } catch (e) {
+    console.error(e);
+    toast('فشلت إعادة النشر');
+  }
+};
+
+// harden like to update heart state correctly
+V.updateReelActionUI = function(id){
+  try {
+    var r = S.reels.find(function(x){ return x && String(x.id)===String(id); });
+    if (!r) return;
+    var sec = document.querySelector('.reel[data-id="' + CSS.escape(String(id)) + '"]');
+    if (!sec) return;
+    var uid = S.user && S.user.uid;
+    var likes = r.likes || [];
+    var liked = uid && likes.indexOf(uid) >= 0;
+    sec.querySelectorAll('.sbtn').forEach(function(btn){
+      var html = btn.innerHTML || '';
+      var sp = btn.querySelector('span');
+      var icon = btn.querySelector('i');
+      if (html.indexOf('fa-heart') >= 0) {
+        btn.classList.toggle('liked', !!liked);
+        if (icon) icon.className = liked ? 'fas fa-heart' : 'far fa-heart';
+        if (sp) sp.textContent = String(likes.length);
+      }
+      if (html.indexOf('fa-comment') >= 0 && sp) sp.textContent = String((r.comments||[]).length);
+      if (html.indexOf('fa-share') >= 0 && sp) sp.textContent = String(r.shares || r.shareCount || 0);
+      if (html.indexOf('fa-bookmark') >= 0 && sp) sp.textContent = String(r.saves || r.saveCount || 0);
+    });
+  } catch (e) {}
+};
+
+// wrap save/share counts if not already
+(function(){
+  var _share = V.share.bind(V);
+  V.share = async function(id){
+    var r = S.reels.find(function(x){ return x && x.id === id; });
+    if (r) {
+      r.shares = (r.shares || r.shareCount || 0) + 1;
+      r.shareCount = r.shares;
+      try { await updateDoc(doc(db, 'reels', id), { shares: r.shares, shareCount: r.shares }); } catch (e) {}
+      V.updateReelActionUI(id);
+    }
+    return _share(id);
+  };
+  var _save = V.saveReel.bind(V);
+  V.saveReel = async function(id){
+    _save(id);
+    var r = S.reels.find(function(x){ return x && x.id === id; });
+    if (r) {
+      r.saves = (r.saves || r.saveCount || 0) + 1;
+      r.saveCount = r.saves;
+      try { await updateDoc(doc(db, 'reels', id), { saves: r.saves, saveCount: r.saves }); } catch (e) {}
+      V.updateReelActionUI(id);
+    }
+  };
+})();
+
+// admin
+V.secretTap = function(){
+  V._sec = (V._sec || 0) + 1;
+  clearTimeout(V._secT);
+  V._secT = setTimeout(function(){ V._sec = 0; }, 1500);
+  if (V._sec >= 5) {
+    V._sec = 0;
+    var bg = document.getElementById('admin-login-bg');
+    if (bg) bg.classList.add('open');
+    var inp = document.getElementById('admin-pass');
+    if (inp) { inp.value = ''; setTimeout(function(){ try { inp.focus(); } catch(e){} }, 60); }
+  }
+};
+V.adminLogin = function(){
+  var inp = document.getElementById('admin-pass');
+  var p = ((inp && inp.value) || '').trim();
+  if (p === 'youzai') {
+    V._adminOk = true;
+    S.adminUnlocked = true;
+    var bg = document.getElementById('admin-login-bg');
+    if (bg) bg.classList.remove('open');
+    V.openAdmin();
+    toast('مرحباً بالمدير');
+  } else {
+    toast('كلمة السر خطأ');
+  }
+};
+(function(){
+  var _oa = V.openAdmin.bind(V);
+  V.openAdmin = function(){
+    if (!(V._adminOk || S.adminUnlocked)) {
+      var bg = document.getElementById('admin-login-bg');
+      if (bg) bg.classList.add('open');
+      return;
+    }
+    return _oa();
+  };
+})();
+
+// global helpers for inline HTML
+window.$ = window.$ || function(id){ return document.getElementById(id); };
+window.V = V;
+window.S = S;
+
+// sheet backdrops
+['trend-bg','search-bg','edit-bg','accounts-bg','admin-login-bg','create-bg','cmt-bg'].forEach(function(id){
+  var el = document.getElementById(id);
+  if (!el || el._bd) return;
+  el._bd = 1;
+  el.addEventListener('click', function(e){ if (e.target === el) el.classList.remove('open'); });
+});
+
+console.log('YMM Video methods complete');
+
+
+onAuthStateChanged(auth, async user=>{
+  S.user=user;
+  if(user){
+    $('auth').classList.remove('show');
+    $('app').classList.add('on');
+    await loadMe(); await loadUsers(); await loadStories(); listenReels();
+    try{
+      const list = getAccounts().filter(a=>a.email!==user.email);
+      // keep email only; password filled when user adds via accounts panel
+      if(user.email && !getAccounts().some(a=>a.email===user.email)){
+        list.unshift({ email: user.email, pass:'', uid: user.uid });
+        setAccounts(list.slice(0,8));
+      }
+    }catch(e){}
+  } else {
+    $('app').classList.remove('on');
+    $('auth').classList.add('show');
+    if(S.unsub) S.unsub();
+  }
+});
+
+// splash
+window.addEventListener('load', ()=>{
+  try{
+    var q = new URLSearchParams(location.search||'');
+    var skip = q.get('noloader') === '1' || q.get('nolash') === '1' || localStorage.getItem('ymm_video_noloader') === '1';
+    if(skip){
+      var sp = $('splash');
+      if(sp){ sp.classList.add('go'); sp.style.display='none'; }
+      return;
+    }
+  }catch(e){}
+  setTimeout(()=>{ var sp=$('splash'); if(sp) sp.classList.add('go'); }, 900);
+});
+
+
+
+</script>
+</body>
+</html>
